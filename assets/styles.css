@@ -1,0 +1,195 @@
+/* ============
+   DriveMe Base
+   ============ */
+:root{
+  --bg: #0b0d12;
+  --panel: #11141a;
+  --muted: #9aa3b2;
+  --text: #e8ecf1;
+  --brand: #6ad1ff;
+  --brand-2:#9bffcc;
+  --ring: rgba(106, 209, 255, .35);
+  --card: #0f1218;
+  --border: #1e2430;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+*{ box-sizing: border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", sans-serif;
+  color: var(--text);
+  background: radial-gradient(1200px 600px at 20% -10%, rgba(106,209,255,.15), transparent 60%) ,
+              radial-gradient(1000px 600px at 100% 0%, rgba(155,255,204,.12), transparent 50%) ,
+              var(--bg);
+  line-height: 1.6;
+}
+
+/* Layout */
+.container{ width: min(1100px, 92vw); margin-inline: auto; }
+.section{ padding: 64px 0; }
+.section.alt{ background: linear-gradient(180deg, transparent, rgba(255,255,255,.02)); }
+.section-title{
+  font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.2rem);
+  margin: 0 0 24px;
+}
+
+.grid-3{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.grid-2{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+@media (max-width: 860px){
+  .grid-3{ grid-template-columns: 1fr; }
+  .grid-2{ grid-template-columns: 1fr; }
+}
+
+/* Header / Nav */
+.site-header{
+  position: sticky; top: 0; z-index: 30;
+  backdrop-filter: saturate(140%) blur(10px);
+  background: rgba(11,13,18,.6);
+  border-bottom: 1px solid var(--border);
+}
+.nav{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0;
+}
+.brand{
+  text-decoration: none;
+  font-weight: 800; letter-spacing: .2px; color: var(--text);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.brand:hover{ opacity: .9; }
+.nav-links{ display: flex; gap: 16px; align-items: center; }
+.nav-links a{
+  color: var(--text); text-decoration: none; opacity: .9;
+}
+.nav-links a:hover{ opacity: 1; }
+
+/* Buttons */
+.btn{
+  --btn-bg: linear-gradient(135deg, var(--brand), var(--brand-2));
+  display: inline-block; border: 0; color: #071018; font-weight: 700;
+  padding: 12px 18px; border-radius: 12px; cursor: pointer;
+  background: var(--btn-bg); box-shadow: var(--shadow); text-decoration: none;
+}
+.btn:hover{ transform: translateY(-1px); }
+.btn:active{ transform: translateY(0); }
+.btn.ghost{
+  color: var(--text);
+  background: transparent; border: 1px solid var(--border); box-shadow: none;
+}
+.btn.btn-sm{ padding: 8px 12px; font-weight: 600; }
+.btn.btn-block{ width: 100%; }
+
+/* Hero */
+.hero{ padding: 72px 0 36px; }
+.hero-grid{
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 28px;
+  align-items: center;
+}
+@media (max-width: 980px){
+  .hero-grid{ grid-template-columns: 1fr; }
+}
+.hero-text h1{
+  font-size: clamp(2rem, 1.6rem + 2.2vw, 3rem);
+  line-height: 1.12; margin: 0 0 12px;
+}
+.lead{ color: #cdd5e1; font-size: 1.05rem; margin-bottom: 18px; }
+.cta{ display: flex; gap: 12px; margin: 10px 0 14px; flex-wrap: wrap; }
+.trust{ list-style: none; padding: 0; margin: 10px 0 0; color: var(--muted); display: grid; gap: 6px; }
+
+/* Pretty phone mock */
+.hero-card{
+  display: grid; place-items: center;
+}
+.phone-frame{
+  width: min(360px, 85vw); height: 700px;
+  border-radius: 36px; background: #0b0f15; border: 1px solid var(--border);
+  box-shadow: var(--shadow); position: relative; overflow: hidden;
+}
+.phone-top,.phone-bottom{
+  position: absolute; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 6px; background: #141922; border-radius: 10px;
+}
+.phone-top{ top: 12px; } .phone-bottom{ bottom: 12px; }
+.phone-screen{
+  position: absolute; inset: 24px; background: #0b1017; border-radius: 24px;
+  border: 1px solid #1a2130; display: grid; place-items: center;
+}
+.app-ui{ width: 88%; }
+.ui-title{ text-align: center; font-weight: 700; margin-bottom: 10px; }
+.ui-card{
+  background: #0f141d; border: 1px solid #1f2838; border-radius: 16px;
+  padding: 14px; display: grid; gap: 10px;
+}
+.ui-card strong{ color: #e8f3ff; }
+.ui-card div{ color: #9fb1c9; font-size: .95rem; }
+.ui-badges{ display:flex; gap:8px; flex-wrap: wrap; margin-top: 10px; }
+.ui-badges span{
+  font-size: .78rem; color: #b7c4d6; border: 1px solid #203049;
+  border-radius: 999px; padding: 6px 10px; background: #0c1320;
+}
+
+/* Cards */
+.card{
+  background: var(--card); border: 1px solid var(--border);
+  padding: 16px; border-radius: 16px; box-shadow: var(--shadow);
+}
+.card h3{ margin: 0 0 6px; }
+.muted{ color: var(--muted); }
+
+/* Steps */
+.steps{ counter-reset: step; list-style: none; padding: 0; display: grid; gap: 12px; }
+.steps li{ background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 12px 14px; }
+.badge{
+  display: inline-grid; place-items: center; width: 26px; height: 26px;
+  border-radius: 999px; background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  color:#071018; font-weight: 800; margin-right: 8px;
+}
+
+/* Team */
+.team .avatar{
+  width: 56px; height: 56px; border-radius: 999px; background: #162233;
+  border: 1px solid var(--border); display: grid; place-items: center;
+  font-weight: 800; color: var(--brand);
+  margin-bottom: 8px;
+}
+
+/* Contact form */
+.contact-form label{ display: grid; gap: 6px; }
+input, textarea{
+  width: 100%; padding: 12px 14px; color: var(--text); background: #0b0f15;
+  border: 1px solid var(--border); border-radius: 12px; outline: none;
+}
+input:focus, textarea:focus{ box-shadow: 0 0 0 4px var(--ring); border-color: transparent; }
+
+/* Footer */
+.site-footer{
+  border-top: 1px solid var(--border);
+  background: var(--panel); padding: 28px 0; margin-top: 30px;
+}
+.footer-grid{ display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.footer-links{ display: flex; gap: 14px; flex-wrap: wrap; }
+.footer-links a{ color: var(--muted); text-decoration: none; }
+.footer-links a:hover{ color: var(--text); }
+
+/* Light mode (if the OS prefers it) */
+@media (prefers-color-scheme: light){
+  :root{
+    --bg: #f6f8fb; --panel:#fff; --text:#0b0d12; --muted:#5c6676;
+    --card:#fff; --border:#e6e9ef; --ring: rgba(116, 163, 255, .35);
+  }
+  .phone-frame{ border-color:#e9ecf3; background:#fff; }
+  .phone-screen{ background:#f6f8fb; border-color:#e6e9ef; }
+  .ui-card{ background:#fff; border-color:#e6e9ef; }
+}
