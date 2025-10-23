@@ -1,12 +1,178 @@
-<doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Driver-on-Demand – Capstone</title>
+  <title>DriveMe — Your Driver, On-Demand</title>
+  <meta name="description" content="DriveMe: a sober, insured driver who drives you and your car home safely." />
+  <meta property="og:title" content="DriveMe — Your Driver, On-Demand" />
+  <meta property="og:description" content="A sober, insured driver who drives you and your car home safely." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
-  <h1>Driver-on-Demand (Capstone)</h1>
-  <p>Problem, solution, features, team, demo, and contact go here.</p>
+  <!-- NAV -->
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="#top" aria-label="DriveMe Home">🚗 DriveMe</a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#team">Team</a>
+        <a href="#contact" class="btn btn-sm">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-text">
+          <h1>Get home safe. We’ll drive <em>you</em> in <em>your</em> car.</h1>
+          <p class="lead">
+            DriveMe sends a vetted, insured driver to your location to drive you and your car home—perfect for nights out or anytime you shouldn’t drive.
+          </p>
+          <div class="cta">
+            <a class="btn" href="#contact">Request access</a>
+            <a class="btn ghost" href="#how">See how it works</a>
+          </div>
+          <ul class="trust">
+            <li>✅ Licensed drivers</li>
+            <li>✅ Insurance coverage</li>
+            <li>✅ 24/7 availability (pilot)</li>
+          </ul>
+        </div>
+        <div class="hero-card">
+          <div class="phone-frame" aria-hidden="true">
+            <div class="phone-top"></div>
+            <div class="phone-screen">
+              <div class="app-ui">
+                <div class="ui-title">DriveMe</div>
+                <div class="ui-card">
+                  <div>
+                    <strong>Pickup</strong>
+                    <div>Live location</div>
+                  </div>
+                  <div>
+                    <strong>Destination</strong>
+                    <div>Home • Saved</div>
+                  </div>
+                  <button class="btn btn-block">Find a driver</button>
+                </div>
+                <div class="ui-badges">
+                  <span>ETA ~15 min</span><span>Fixed price</span><span>Two-step verify</span>
+                </div>
+              </div>
+            </div>
+            <div class="phone-bottom"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="section">
+      <div class="container">
+        <h2 class="section-title">Why DriveMe</h2>
+        <div class="grid-3">
+          <article class="card">
+            <h3>Safety first</h3>
+            <p>Background-checked drivers, identity verification, and live trip sharing to keep you safe end-to-end.</p>
+          </article>
+          <article class="card">
+            <h3>Your car, your route</h3>
+            <p>We drive your own vehicle so it’s waiting at home with you—no next-day car pickup hassles.</p>
+          </article>
+          <article class="card">
+            <h3>Transparent pricing</h3>
+            <p>Up-front fixed fare before you book, no surge. Cancel within 2 minutes at no cost.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="section alt">
+      <div class="container">
+        <h2 class="section-title">How it works</h2>
+        <ol class="steps">
+          <li><span class="badge">1</span> Request a driver to your location.</li>
+          <li><span class="badge">2</span> Verify with a 2-word passphrase and hand over the keys.</li>
+          <li><span class="badge">3</span> Get driven home in your own car. Done.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section id="team" class="section">
+      <div class="container">
+        <h2 class="section-title">Team</h2>
+        <div class="grid-3 team">
+          <div class="card">
+            <div class="avatar" aria-hidden="true">UG</div>
+            <h3>Ufuk Güler</h3>
+            <p>Backend & Infrastructure</p>
+          </div>
+          <div class="card">
+            <div class="avatar" aria-hidden="true">AA</div>
+            <h3>Advisor / Mentor</h3>
+            <p>Safety & Compliance</p>
+          </div>
+          <div class="card">
+            <div class="avatar" aria-hidden="true">DX</div>
+            <h3>Teammate</h3>
+            <p>Mobile & UX</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section alt">
+      <div class="container">
+        <h2 class="section-title">Contact</h2>
+        <p class="muted">This form is a static placeholder. Connect it to a service like Formspree or your own API.</p>
+        <form class="contact-form" action="#" method="post">
+          <div class="grid-2">
+            <label>
+              <span>Name</span>
+              <input required type="text" name="name" placeholder="Your name" />
+            </label>
+            <label>
+              <span>Email</span>
+              <input required type="email" name="email" placeholder="you@example.com" />
+            </label>
+          </div>
+          <label>
+            <span>Message</span>
+            <textarea name="message" rows="5" placeholder="Tell us about your use case…"></textarea>
+          </label>
+          <button class="btn" type="submit">Send message</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <strong>DriveMe</strong>
+        <p class="muted">© <span id="year"></span> DriveMe — Capstone Project</p>
+      </div>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#team">Team</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+    <!-- No JS required; this is just a graceful fallback -->
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+  </footer>
 </body>
 </html>
