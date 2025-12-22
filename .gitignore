@@ -1,0 +1,259 @@
+# ===========================
+# DriveMe Project .gitignore
+# ===========================
+
+# ===========================
+# Java / Spring Boot / Gradle
+# ===========================
+backend/.gradle/
+backend/build/
+backend/out/
+backend/bin/
+backend/.gradle
+backend/gradle-app.setting
+backend/!gradle-wrapper.jar
+backend/.gradletasknamecache
+
+# Compiled class files
+backend/**/*.class
+
+# Log files
+backend/**/*.log
+
+# Package files
+backend/**/*.jar
+backend/**/*.war
+backend/**/*.nar
+backend/**/*.ear
+backend/**/*.zip
+backend/**/*.tar.gz
+backend/**/*.rar
+
+# Spring Boot specific
+backend/target/
+backend/!.mvn/wrapper/maven-wrapper.jar
+backend/!**/src/main/**/target/
+backend/!**/src/test/**/target/
+
+# ===========================
+# Flutter / Dart / Mobile
+# ===========================
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+mobile/.pub-cache/
+mobile/.pub/
+mobile/build/
+mobile/lib/generated_plugin_registrant.dart
+
+# Flutter/Dart coverage
+mobile/coverage/
+
+# Flutter version manager
+mobile/.fvm/
+
+# Android specific
+mobile/android/.gradle/
+mobile/android/app/debug
+mobile/android/app/profile
+mobile/android/app/release
+mobile/android/captures/
+mobile/android/local.properties
+mobile/android/.cxx/
+mobile/android/*.jks
+mobile/android/key.properties
+
+# Exclude non-Android platforms (removed from repo)
+mobile/ios/
+mobile/web/
+mobile/macos/
+mobile/windows/
+mobile/linux/
+
+# iOS specific
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Flutter/Flutter.framework
+mobile/ios/Flutter/Flutter.podspec
+mobile/ios/.generated/
+mobile/ios/Flutter/App.framework
+mobile/ios/Flutter/ephemeral/
+mobile/ios/ServiceDefinitions.json
+mobile/ios/Runner/GeneratedPluginRegistrant.*
+mobile/ios/**/*.mode1v3
+mobile/ios/**/*.mode2v3
+mobile/ios/**/*.moved-aside
+mobile/ios/**/*.pbxuser
+mobile/ios/**/*.perspectivev3
+mobile/ios/**/*sync/
+mobile/ios/**/.sconsign.dblite
+mobile/ios/**/.tags*
+mobile/ios/**/.vagrant/
+mobile/ios/**/DerivedData/
+mobile/ios/**/Icon?
+mobile/ios/**/Pods/
+mobile/ios/**/.vagrant/
+
+# ===========================
+# Docker
+# ===========================
+infra/volumes/
+infra/data/
+
+# ===========================
+# IDEs / Editors
+# ===========================
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/
+
+# VS Code
+.vscode/
+*.code-workspace
+.history/
+
+# Android Studio
+local.properties
+.gradle
+captures/
+.externalNativeBuild
+.cxx
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ===========================
+# Operating System
+# ===========================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ===========================
+# Environment & Secrets
+# ===========================
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+secrets.yml
+secrets.yaml
+application-local.yml
+application-secrets.yml
+
+# Google Services
+mobile/android/app/google-services.json
+mobile/ios/Runner/GoogleService-Info.plist
+
+# API Keys
+**/apikeys.properties
+**/*-key.json
+
+# ===========================
+# Logs & Databases
+# ===========================
+*.log
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+
+# ===========================
+# Testing
+# ===========================
+test-results/
+test-output/
+*.coverage
+.nyc_output/
+
+# ===========================
+# Backup & Temporary Files
+# ===========================
+*.bak
+*.tmp
+*.temp
+*.swp
+*.swo
+*~.nib
+*.orig
+*.rej
+
+# ===========================
+# Node.js (if added later)
+# ===========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# ===========================
+# Documentation builds
+# ===========================
+docs/_build/
+docs/.doctrees/
+
+# ===========================
+# Misc
+# ===========================
+*.pid
+*.seed
+*.pid.lock
+.cache

@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: driveme-postgres
+    environment:
+      POSTGRES_DB: driveme
+      POSTGRES_USER: driveme
+      POSTGRES_PASSWORD: driveme
+    ports:
+      - "5432:5432"
+    volumes:
+      - driveme_pgdata:/var/lib/postgresql/data
+    networks:
+      - driveme-network
+
+  # OPTIONAL: Uncomment to run backend in Docker
+  # backend:
+  #   build:
+  #     context: ../backend
+  #     dockerfile: Dockerfile
+  #   container_name: driveme-backend
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - postgres
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/driveme
+  #     SPRING_DATASOURCE_USERNAME: driveme
+  #     SPRING_DATASOURCE_PASSWORD: driveme
+  #   networks:
+  #     - driveme-network
+
+volumes:
+  driveme_pgdata:
+
+networks:
+  driveme-network:
+    driver: bridge
