@@ -1,0 +1,23 @@
+package com.driveme.backend.user;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+/**
+ * Data Transfer Object for passenger response.
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class PassengerResponse {
+
+    private UUID id;
+    private String email;
+    private String fullName;
+    private String phoneNumber;
+    private boolean active;
+}
