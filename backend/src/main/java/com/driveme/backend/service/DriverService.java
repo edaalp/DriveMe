@@ -1,5 +1,10 @@
-package com.driveme.backend.user;
+package com.driveme.backend.service;
 
+import com.driveme.backend.dto.DriverSignUpRequest;
+import com.driveme.backend.entity.Driver;
+import com.driveme.backend.helper.DriverMapper;
+import com.driveme.backend.repository.DriverRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +33,8 @@ public class DriverService {
      * @throws IllegalArgumentException if email already exists or passwords don't match
      */
     @Transactional
-    public Driver signUp(DriverSignUpRequest request) {
+    public Driver signUp(@Valid  DriverSignUpRequest request) {
+        //removed @org.checkerframework.checker.nullness.qual.MonotonicNonNull
         log.info("Attempting to sign up driver with email: {}", request.getEmail());
 
         // Validate password confirmation

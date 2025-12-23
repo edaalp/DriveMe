@@ -1,4 +1,4 @@
-package com.driveme.backend.user;
+package com.driveme.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,12 @@
-package com.driveme.backend.user;
+package com.driveme.backend.service;
 
 import com.driveme.backend.config.JwtUtil;
+import com.driveme.backend.dto.LoginRequest;
+import com.driveme.backend.dto.LoginResponse;
+import com.driveme.backend.entity.Driver;
+import com.driveme.backend.entity.Passenger;
+import com.driveme.backend.repository.DriverRepository;
+import com.driveme.backend.repository.PassengerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;

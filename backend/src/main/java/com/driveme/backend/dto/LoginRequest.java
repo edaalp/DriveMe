@@ -1,4 +1,4 @@
-package com.driveme.backend.user;
+package com.driveme.backend.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,7 +1,8 @@
-package com.driveme.backend.user;
+package com.driveme.backend.helper;
 
+import com.driveme.backend.entity.Driver;
 import org.springframework.stereotype.Component;
-
+import com.driveme.backend.dto.DriverResponse;
 import java.util.Base64;
 
 /**
@@ -17,7 +18,7 @@ public class DriverMapper {
      * @param hashedPassword the hashed password
      * @return the driver entity
      */
-    public Driver toEntity(DriverSignUpRequest request, String hashedPassword) {
+    public Driver toEntity(com.driveme.backend.dto.DriverSignUpRequest request, String hashedPassword) {
         Driver driver = new Driver(
             request.getLicenseNumber(),
             request.getVehicleDescription(),
