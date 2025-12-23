@@ -34,7 +34,6 @@ public class SecurityConfig {
     /**
      * Security filter chain configuration.
      * Configures JWT authentication and public endpoints.
-     * Note: In production, payment and penalty endpoints should require authentication.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -49,6 +48,7 @@ public class SecurityConfig {
                     "/api/auth/login",
                     "/api/passengers/signup",
                     "/api/drivers/signup",
+                    "api/trips/**",
                     // Swagger UI
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
@@ -67,3 +67,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+
