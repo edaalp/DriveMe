@@ -1,46 +1,34 @@
 package com.driveme.backend.user;
 
-import java.util.Date;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+import java.util.UUID;
+
 /**
- * Driver user type.
+ * Data Transfer Object for driver response.
  */
-@Entity
 @Data
-@EqualsAndHashCode(callSuper=true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Driver extends BaseUser {
+public class DriverResponse {
 
+    private UUID id;
+    private String email;
+    private String fullName;
+    private String phoneNumber;
+    private boolean active;
     private String licenseNumber;
-
     private String vehicleDescription;
-
-    private boolean isAvailable;
-
+    private boolean available;
     private double maxPickupRadiusKm;
-
     private double maxDropoffRadiusKm;
-
     private boolean acceptsPets;
-
     private double avgRating;
-
     private long tckNo;
-
     private String driverLicenseNumber;
-
-    private Date licanseIssueDate;
-
-    @Lob
-    private byte[] criminalRecordFile;
-
+    private Date licenseIssueDate;
     private String criminalRecordFileName;
 }
