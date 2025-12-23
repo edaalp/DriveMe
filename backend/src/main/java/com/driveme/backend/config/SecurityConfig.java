@@ -28,6 +28,7 @@ public class SecurityConfig {
     /**
      * Security filter chain configuration.
      * Allows public access to Swagger UI and API endpoints.
+     * Note: In production, payment and penalty endpoints should require authentication.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,10 +36,18 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                    // Public endpoints
                     "/api/passengers/signup",
+                    // Swagger UI
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
-                    "/swagger-ui.html"
+                    "/swagger-ui.html",
+                    // Payment endpoints (demo mode - should require auth in production)
+                    "/api/payments/**",
+                    // Penalty endpoints (demo mode - should require auth in production)
+                    "/api/penalties/**",
+                    // Actuator endpoints
+                    "/actuator/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             );
