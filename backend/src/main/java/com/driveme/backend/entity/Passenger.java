@@ -1,4 +1,4 @@
-package com.driveme.backend.user;
+package com.driveme.backend.entity;
 
 import jakarta.persistence.Entity;
 import lombok.Data;

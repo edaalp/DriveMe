@@ -1,5 +1,8 @@
-package com.driveme.backend.user;
+package com.driveme.backend.helper;
 
+import com.driveme.backend.entity.Passenger;
+import com.driveme.backend.dto.PassengerDTO;
+import com.driveme.backend.auth.PassengerSignUpRequest;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,12 +35,12 @@ public class PassengerMapper {
      * @param passenger the passenger entity
      * @return the passenger response DTO
      */
-    public PassengerResponse toResponse(Passenger passenger) {
+    public PassengerDTO toDTO(Passenger passenger) {
         if (passenger == null) {
             return null;
         }
         
-        PassengerResponse response = new PassengerResponse();
+        PassengerDTO response = new PassengerDTO();
         response.setId(passenger.getId());
         response.setEmail(passenger.getEmail());
         response.setFullName(passenger.getFullName());

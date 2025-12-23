@@ -1,5 +1,6 @@
-package com.driveme.backend.user;
+package com.driveme.backend.repository;
 
+import com.driveme.backend.entity.Driver;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
