@@ -1,4 +1,4 @@
-package com.driveme.backend.user;
+package com.driveme.backend.entity;
 
 import com.driveme.backend.common.BaseEntity;
 import jakarta.persistence.Entity;

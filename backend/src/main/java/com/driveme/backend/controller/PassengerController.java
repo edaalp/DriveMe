@@ -1,5 +1,10 @@
-package com.driveme.backend.user;
+package com.driveme.backend.controller;
 
+import com.driveme.backend.entity.Passenger;
+import com.driveme.backend.helper.PassengerMapper;
+import com.driveme.backend.dto.PassengerDTO;
+import com.driveme.backend.service.PassengerService;
+import com.driveme.backend.auth.PassengerSignUpRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +37,7 @@ public class PassengerController {
             Passenger passenger = passengerService.signUp(request);
             
             // Convert to response DTO using mapper
-            PassengerResponse response = passengerMapper.toResponse(passenger);
+            PassengerDTO response = passengerMapper.toDTO(passenger);
             
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
@@ -55,7 +60,7 @@ public class PassengerController {
     @GetMapping
     public ResponseEntity<?> getByEmail(@RequestParam String email) {
         return passengerService.findByEmail(email)
-                .map(passengerMapper::toResponse)
+                .map(passengerMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

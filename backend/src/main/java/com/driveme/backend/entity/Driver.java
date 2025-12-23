@@ -1,4 +1,4 @@
-package com.driveme.backend.user;
+package com.driveme.backend.entity;
 
 import java.util.Date;
 
@@ -7,6 +7,7 @@ import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * Driver user type.
@@ -14,6 +15,7 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Data
 @EqualsAndHashCode(callSuper=true)
+@NoArgsConstructor
 @AllArgsConstructor
 public class Driver extends BaseUser {
 
@@ -31,9 +33,9 @@ public class Driver extends BaseUser {
 
     private double avgRating;
 
-    private int tckNo;
+    private long tckNo;
 
-    private String DriverLicenseNumber;
+    private String driverLicenseNumber;
 
     private Date licanseIssueDate;
 
@@ -41,9 +43,4 @@ public class Driver extends BaseUser {
     private byte[] criminalRecordFile;
 
     private String criminalRecordFileName;
-
-    protected Driver() {
-        // for JPA
-    }
-
 }
