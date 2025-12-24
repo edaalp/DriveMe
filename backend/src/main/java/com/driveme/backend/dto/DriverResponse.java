@@ -21,12 +21,7 @@ public class DriverResponse {
     private String phoneNumber;
     private boolean active;
     private String licenseNumber;
-    private String vehicleDescription;
     private boolean available;
-    private double maxPickupRadiusKm;
-    private double maxDropoffRadiusKm;
-    private boolean acceptsPets;
-    private double avgRating;
     private long tckNo;
     private String driverLicenseNumber;
     private Date licenseIssueDate;

@@ -26,14 +26,6 @@ public class DriverSignUpRequest {
 
     private String licenseNumber;
 
-    private String vehicleDescription;
-
-    private double maxPickupRadiusKm;
-
-    private double maxDropoffRadiusKm;
-
-    private boolean acceptsPets;
-
     private long tckNo;
 
     private String driverLicenseNumber;

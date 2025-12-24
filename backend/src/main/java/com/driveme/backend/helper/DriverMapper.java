@@ -19,20 +19,7 @@ public class DriverMapper {
      * @return the driver entity
      */
     public Driver toEntity(com.driveme.backend.dto.DriverSignUpRequest request, String hashedPassword) {
-        Driver driver = new Driver(
-            request.getLicenseNumber(),
-            request.getVehicleDescription(),
-            false, // isAvailable - defaults to false for new drivers
-            request.getMaxPickupRadiusKm(),
-            request.getMaxDropoffRadiusKm(),
-            request.isAcceptsPets(),
-            0.0, // avgRating - starts at 0
-            request.getTckNo(),
-            request.getDriverLicenseNumber(),
-            request.getLicenseIssueDate(),
-            decodeBase64File(request.getCriminalRecordFile()),
-            request.getCriminalRecordFileName()
-        );
+        Driver driver = new Driver();
         
         // Set BaseUser fields
         driver.setEmail(request.getEmail());
@@ -40,6 +27,16 @@ public class DriverMapper {
         driver.setPhoneNumber(request.getPhoneNumber());
         driver.setPasswordHash(hashedPassword);
         driver.setActive(true);
+        
+        // Set Driver-specific fields
+        driver.setLicenseNumber(request.getLicenseNumber());
+        driver.setAvailable(false); // defaults to false for new drivers
+        driver.setAvgRating(0.0); // starts at 0
+        driver.setTckNo(request.getTckNo());
+        driver.setDriverLicenseNumber(request.getDriverLicenseNumber());
+        driver.setLicanseIssueDate(request.getLicenseIssueDate());
+        driver.setCriminalRecordFile(decodeBase64File(request.getCriminalRecordFile()));
+        driver.setCriminalRecordFileName(request.getCriminalRecordFileName());
         
         return driver;
     }
@@ -63,12 +60,7 @@ public class DriverMapper {
         response.setPhoneNumber(driver.getPhoneNumber());
         response.setActive(driver.isActive());
         response.setLicenseNumber(driver.getLicenseNumber());
-        response.setVehicleDescription(driver.getVehicleDescription());
         response.setAvailable(driver.isAvailable());
-        response.setMaxPickupRadiusKm(driver.getMaxPickupRadiusKm());
-        response.setMaxDropoffRadiusKm(driver.getMaxDropoffRadiusKm());
-        response.setAcceptsPets(driver.isAcceptsPets());
-        response.setAvgRating(driver.getAvgRating());
         response.setTckNo(driver.getTckNo());
         response.setDriverLicenseNumber(driver.getDriverLicenseNumber());
         response.setLicenseIssueDate(driver.getLicanseIssueDate());
