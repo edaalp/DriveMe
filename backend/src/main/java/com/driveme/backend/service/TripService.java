@@ -37,15 +37,6 @@ public class TripService {
     public TripEntity createTrip(TripEntity trip) {
         log.info("Creating new trip");
 
-        if (trip == null) {
-            log.error("Trip payload is null");
-            throw new IllegalArgumentException("Trip must not be null");
-        }
-
-        if (trip.getPassengerId() == null) {
-            log.error("Missing passengerId in trip payload");
-            throw new IllegalArgumentException("Passenger id is required");
-        }
 
         if (trip.getStatus() == null) {
             trip.setStatus(TripStatusEnum.CREATED);

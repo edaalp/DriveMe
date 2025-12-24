@@ -23,6 +23,9 @@ public class TripDTO {
     private UUID passengerId;
     private UUID driverId;
     private TripStatusEnum status;
+    private Timestamp startTime;
+    private Timestamp endTime;
+    private String status;
 
 }
 

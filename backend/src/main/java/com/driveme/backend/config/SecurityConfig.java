@@ -44,21 +44,15 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    // Auth endpoints
                     "/api/auth/login",
                     "/api/passengers/signup",
                     "/api/drivers/signup",
                     "api/trips/**",
+                    "api/trips/**",
                     // Swagger UI
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
-                    "/swagger-ui.html",
-                    // Payment endpoints (demo mode - should require auth in production)
-                    "/api/payments/**",
-                    // Penalty endpoints (demo mode - should require auth in production)
-                    "/api/penalties/**",
-                    // Actuator endpoints
-                    "/actuator/**"
+                    "/swagger-ui.html"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
