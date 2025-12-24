@@ -21,7 +21,7 @@ public class TripController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TripEntity> getTripById(@PathVariable UUID id) {
-        log.info("GET /api/trips/{}", id);
+        log.info("hey", id);
         return ResponseEntity.ok(tripService.findById(id));
     }
 
@@ -41,9 +41,14 @@ public class TripController {
 
     @PostMapping
     public ResponseEntity<TripEntity> createTrip(@RequestBody TripDTO trip) {
-        log.info("entered");
         log.info("Creating trip: {}", trip.getStatus());
-        TripEntity createdTrip = tripService.createTrip(trip);
+        log.info("DTO CHECK → passengerId={}, driverId={}, status={}",
+                trip.getPassengerId(), trip.getDriverId(), trip.getStatus());
+        TripEntity tripEntity = new TripEntity();
+        tripEntity.setPassengerId(trip.getPassengerId());
+        tripEntity.setDriverId(trip.getDriverId());
+        tripEntity.setStatus(trip.getStatus());
+        TripEntity createdTrip = tripService.createTrip(tripEntity);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTrip);
     }
 

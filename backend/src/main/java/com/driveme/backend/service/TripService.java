@@ -34,17 +34,31 @@ public class TripService {
         return tripRepository.findAllByDriverId(driverId);
     }
 
-    public TripEntity createTrip(TripDTO trip) {
+    public TripEntity createTrip(TripEntity trip) {
         log.info("Creating new trip");
-        TripEntity tripEntity = new TripEntity();
-        tripEntity.setPassengerId(trip.getPassengerId());
-        tripEntity.setDriverId(trip.getDriverId());
-        tripEntity.setStatus(TripStatusEnum.valueOf(trip.getStatus()));
-        try {
-            return tripRepository.save(tripEntity);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+
+        if (trip == null) {
+            log.error("Trip payload is null");
+            throw new IllegalArgumentException("Trip must not be null");
         }
+
+        if (trip.getPassengerId() == null) {
+            log.error("Missing passengerId in trip payload");
+            throw new IllegalArgumentException("Passenger id is required");
+        }
+
+        if (trip.getStatus() == null) {
+            trip.setStatus(TripStatusEnum.CREATED);
+            log.debug("Status not provided, defaulting to CREATED");
+        }
+
+
+        log.info("Trip details → passengerId={}, driverId={}, status={}",
+                trip.getPassengerId(), trip.getDriverId(), trip.getStatus());
+
+        TripEntity saved = tripRepository.save(trip);
+        log.info("Trip created with id={}", saved.getTripId());
+        return saved;
     }
 
     public TripEntity updateTrip(UUID id, TripEntity tripDetails) {
