@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         jwt = authHeader.substring(7);
         
         try {
-            // Extract username from token
+            // Extract username (email) from token
             userEmail = jwtUtil.extractUsername(jwt);
 
             // If username is valid and no authentication is set in the context
@@ -57,9 +57,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Validate token
                 if (jwtUtil.validateToken(jwt, userEmail)) {
                     
-                    // Create authentication token
+                    // Extract userId from token to use as principal
+                    String userId = jwtUtil.extractUserId(jwt);
+                    
+                    // Create authentication token with userId as principal
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userEmail,
+                            userId,  // Use userId instead of email
                             null,
                             new ArrayList<>()
                     );
@@ -69,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // Set authentication in security context
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                     
-                    log.debug("JWT token validated for user: {}", userEmail);
+                    log.debug("JWT token validated for user: {} (userId: {})", userEmail, userId);
                 }
             }
         } catch (Exception e) {
