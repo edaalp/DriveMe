@@ -19,26 +19,6 @@ A full-stack ride-sharing application built for Bilkent CS492 Semester-1 demo, d
 - **Docker Compose** (PostgreSQL containerization)
 - **GitHub Actions** (CI/CD)
 
-## 📁 Project Structure
-
-```
-driveme/
-├── backend/              # Spring Boot REST API + WebSocket
-│   ├── src/main/java/com/driveme/
-│   │   ├── DriveMeApplication.java
-│   │   ├── ws/          # WebSocket configuration
-│   │   └── requests/    # Ride request entities, services, controllers
-│   └── build.gradle
-├── mobile/              # Flutter application
-│   ├── lib/
-│   │   ├── main.dart
-│   │   ├── ws/         # WebSocket client
-│   │   └── screens/    # UI screens
-│   └── pubspec.yaml
-├── infra/
-│   └── docker-compose.yml   # PostgreSQL setup
-└── .github/workflows/       # CI/CD pipelines
-```
 
 ## 🚀 Quick Start
 
@@ -188,7 +168,6 @@ GitHub Actions workflows automatically run on push/PR:
 - [x] CI/CD pipelines (GitHub Actions)
 - [x] Backend REST API with Swagger documentation
 - [x] Database integration (PostgreSQL + JPA)
-- [x] Real-time communication (WebSocket/STOMP)
 - [x] Mobile app with working screens
 - [x] End-to-end integration (create request → broadcast → mobile receives)
 
@@ -233,10 +212,10 @@ GitHub Actions workflows automatically run on push/PR:
 
 ## 📄 License
 
-This is a student project for Bilkent University CS492.
+This is a student project for Bilkent University CS491-492.
 
 ---
 
 **Project Team**: DriveMe  
-**Course**: CS492 - Senior Project  
+**Course**: CS491 - Senior Project  
 **Semester**: Fall 2025 
