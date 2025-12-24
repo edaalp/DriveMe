@@ -25,7 +25,5 @@ public class TripDTO {
     private TripStatusEnum status;
     private Timestamp startTime;
     private Timestamp endTime;
-    private String status;
-
 }
 

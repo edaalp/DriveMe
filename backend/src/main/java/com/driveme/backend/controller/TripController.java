@@ -42,6 +42,11 @@ public class TripController {
     @PostMapping
     public ResponseEntity<TripEntity> createTrip(@RequestBody TripDTO trip) {
         log.info("Creating trip: {}", trip.getStatus());
+        TripEntity newEntity = new TripEntity();
+        newEntity.setPassengerId(trip.getPassengerId());
+        newEntity.setDriverId(trip.getDriverId());
+        newEntity.setStatus(trip.getStatus());
+        TripEntity createdTrip = tripService.createTrip(newEntity);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTrip);
     }
 
