@@ -39,6 +39,7 @@ public class TripRequestService {
     private static final BigDecimal MIN_PRICE_PER_KM = new BigDecimal("12.00");
     private static final BigDecimal MAX_PRICE_PER_KM = new BigDecimal("18.00");
     private static final BigDecimal MIN_BASE_PRICE = new BigDecimal("50.00");
+    private static final double MIN_DISTANCE_KM = 0.05;
 
     /**
      * Create a new trip request.
@@ -59,6 +60,8 @@ public class TripRequestService {
                 throw new RuntimeException("Vehicle does not belong to the passenger");
             }
         }
+
+        validateTripGeometry(request.getPickup(), request.getDestination());
 
         // Create trip request
         TripRequest tripRequest = TripRequestMapper.toEntity(request, passenger, vehicle);
@@ -126,6 +129,8 @@ public class TripRequestService {
      * Calculate price range based on pickup and destination locations.
      */
     public PriceRangeDTO calculatePriceRange(LocationDTO pickup, LocationDTO destination) {
+        validateTripGeometry(pickup, destination);
+
         Location pickupLoc = TripRequestMapper.toLocation(pickup);
         Location destLoc = TripRequestMapper.toLocation(destination);
 
@@ -150,6 +155,10 @@ public class TripRequestService {
      * Calculate price range based on distance in km.
      */
     public PriceRangeDTO calculatePriceRangeByDistance(double distanceKm) {
+        if (distanceKm < 0) {
+            throw new IllegalArgumentException("Distance cannot be negative");
+        }
+
         BigDecimal distance = BigDecimal.valueOf(distanceKm);
         BigDecimal minPrice = MIN_PRICE_PER_KM.multiply(distance).setScale(2, RoundingMode.HALF_UP);
         BigDecimal maxPrice = MAX_PRICE_PER_KM.multiply(distance).setScale(2, RoundingMode.HALF_UP);
@@ -164,5 +173,18 @@ public class TripRequestService {
 
         return PriceRangeDTO.ofTRY(minPrice, maxPrice, distanceKm);
     }
-}
 
+    private void validateTripGeometry(LocationDTO pickup, LocationDTO destination) {
+        if (pickup == null || destination == null) {
+            throw new IllegalArgumentException("Pickup and destination are required");
+        }
+
+        Location pickupLoc = TripRequestMapper.toLocation(pickup);
+        Location destinationLoc = TripRequestMapper.toLocation(destination);
+        double distanceKm = pickupLoc.distanceTo(destinationLoc);
+
+        if (distanceKm < MIN_DISTANCE_KM) {
+            throw new IllegalArgumentException("Pickup and destination cannot be the same location");
+        }
+    }
+}

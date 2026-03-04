@@ -6,6 +6,7 @@ import com.driveme.backend.dto.PriceRangeDTO;
 import com.driveme.backend.dto.TripRequestDTO;
 import com.driveme.backend.service.TripRequestService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -88,7 +89,7 @@ public class TripRequestController {
      */
     @PostMapping("/calculate-price")
     public ResponseEntity<PriceRangeDTO> calculatePrice(
-            @RequestBody CalculatePriceRequest request) {
+            @Valid @RequestBody CalculatePriceRequest request) {
         PriceRangeDTO priceRange = tripRequestService.calculatePriceRange(request.getPickup(), request.getDestination());
         return ResponseEntity.ok(priceRange);
     }
@@ -109,7 +110,12 @@ public class TripRequestController {
      */
     @lombok.Data
     public static class CalculatePriceRequest {
+        @NotNull(message = "Pickup location is required")
+        @Valid
         private LocationDTO pickup;
+
+        @NotNull(message = "Destination location is required")
+        @Valid
         private LocationDTO destination;
     }
 }
