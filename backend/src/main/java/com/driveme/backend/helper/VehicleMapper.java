@@ -30,7 +30,13 @@ public final class VehicleMapper {
                 .year(vehicle.getYear())
                 .transmission(vehicle.getTransmission())
                 .status(vehicle.getStatus())
+                .rejectionReason(vehicle.getRejectionReason())
+                .hasDocument(vehicle.getDocumentFile() != null && vehicle.getDocumentFile().length > 0)
+                .documentFileName(vehicle.getDocumentFileName())
                 .passengerId(vehicle.getPassenger() != null ? vehicle.getPassenger().getId() : null)
+                .ownerFullName(vehicle.getPassenger() != null ? vehicle.getPassenger().getFullName() : null)
+                .ownerEmail(vehicle.getPassenger() != null ? vehicle.getPassenger().getEmail() : null)
+                .ownerPhoneNumber(vehicle.getPassenger() != null ? vehicle.getPassenger().getPhoneNumber() : null)
                 .createdAt(vehicle.getCreatedAt())
                 .updatedAt(vehicle.getUpdatedAt())
                 .build();

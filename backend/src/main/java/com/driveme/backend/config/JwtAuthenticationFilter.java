@@ -8,14 +8,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * JWT authentication filter for validating JWT tokens.
@@ -57,14 +57,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Validate token
                 if (jwtUtil.validateToken(jwt, userEmail)) {
                     
-                    // Extract userId from token to use as principal
                     String userId = jwtUtil.extractUserId(jwt);
-                    
-                    // Create authentication token with userId as principal
+                    String userType = jwtUtil.extractUserType(jwt);
+
+                    // Map userType to Spring Security role (ROLE_DRIVER, ROLE_PASSENGER, ROLE_ADMIN)
+                    var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + userType));
+
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userId,  // Use userId instead of email
+                            userId,
                             null,
-                            new ArrayList<>()
+                            authorities
                     );
                     
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

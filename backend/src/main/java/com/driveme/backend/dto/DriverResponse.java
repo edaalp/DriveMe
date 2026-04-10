@@ -1,5 +1,6 @@
 package com.driveme.backend.dto;
 
+import com.driveme.backend.common.VerificationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,4 +27,6 @@ public class DriverResponse {
     private String driverLicenseNumber;
     private Date licenseIssueDate;
     private String criminalRecordFileName;
+    private VerificationStatus verificationStatus;
+    private String rejectionReason;
 }

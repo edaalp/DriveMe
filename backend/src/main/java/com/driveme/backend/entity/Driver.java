@@ -2,8 +2,8 @@ package com.driveme.backend.entity;
 
 import java.util.Date;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Lob;
+import com.driveme.backend.common.VerificationStatus;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -43,4 +43,10 @@ public class Driver extends BaseUser {
     private byte[] criminalRecordFile;
 
     private String criminalRecordFileName;
+
+    @Enumerated(EnumType.STRING)
+    private VerificationStatus verificationStatus = VerificationStatus.PENDING;
+
+    @Column(length = 500)
+    private String rejectionReason;
 }

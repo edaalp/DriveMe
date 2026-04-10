@@ -20,24 +20,26 @@ public class DriverMapper {
      */
     public Driver toEntity(com.driveme.backend.dto.DriverSignUpRequest request, String hashedPassword) {
         Driver driver = new Driver();
-        
-        // Set BaseUser fields
+
         driver.setEmail(request.getEmail());
         driver.setFullName(request.getFullName());
         driver.setPhoneNumber(request.getPhoneNumber());
         driver.setPasswordHash(hashedPassword);
         driver.setActive(true);
-        
-        // Set Driver-specific fields
+
         driver.setLicenseNumber(request.getLicenseNumber());
-        driver.setAvailable(false); // defaults to false for new drivers
-        driver.setAvgRating(0.0); // starts at 0
+        driver.setVehicleDescription(request.getVehicleDescription());
+        driver.setAvailable(false);
+        driver.setMaxPickupRadiusKm(request.getMaxPickupRadiusKm());
+        driver.setMaxDropoffRadiusKm(request.getMaxDropoffRadiusKm());
+        driver.setAcceptsPets(request.isAcceptsPets());
+        driver.setAvgRating(0.0);
         driver.setTckNo(request.getTckNo());
         driver.setDriverLicenseNumber(request.getDriverLicenseNumber());
         driver.setLicanseIssueDate(request.getLicenseIssueDate());
         driver.setCriminalRecordFile(decodeBase64File(request.getCriminalRecordFile()));
         driver.setCriminalRecordFileName(request.getCriminalRecordFileName());
-        
+
         return driver;
     }
 
@@ -65,6 +67,8 @@ public class DriverMapper {
         response.setDriverLicenseNumber(driver.getDriverLicenseNumber());
         response.setLicenseIssueDate(driver.getLicanseIssueDate());
         response.setCriminalRecordFileName(driver.getCriminalRecordFileName());
+        response.setVerificationStatus(driver.getVerificationStatus());
+        response.setRejectionReason(driver.getRejectionReason());
         
         return response;
     }

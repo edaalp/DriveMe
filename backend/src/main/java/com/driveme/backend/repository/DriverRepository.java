@@ -1,5 +1,6 @@
 package com.driveme.backend.repository;
 
+import com.driveme.backend.common.VerificationStatus;
 import com.driveme.backend.entity.Driver;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -48,4 +49,9 @@ public interface DriverRepository extends JpaRepository<Driver, UUID> {
      * Check if username exists.
      */
     boolean existsByUserName(String userName);
+
+    /**
+     * Find drivers by verification status.
+     */
+    List<Driver> findByVerificationStatus(VerificationStatus verificationStatus);
 }

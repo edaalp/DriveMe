@@ -40,6 +40,14 @@ public class Vehicle extends BaseEntity {
     @Column(nullable = false)
     private VerificationStatus status = VerificationStatus.PENDING;
 
+    @Column(length = 500)
+    private String rejectionReason;
+
+    @Lob
+    private byte[] documentFile;
+
+    private String documentFileName;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "passenger_id", nullable = false)
     private Passenger passenger;

@@ -3,14 +3,17 @@ package com.driveme.backend.service;
 import com.driveme.backend.config.JwtUtil;
 import com.driveme.backend.dto.LoginRequest;
 import com.driveme.backend.dto.LoginResponse;
+import com.driveme.backend.entity.Admin;
 import com.driveme.backend.entity.Driver;
 import com.driveme.backend.entity.Passenger;
+import com.driveme.backend.repository.AdminRepository;
 import com.driveme.backend.repository.DriverRepository;
 import com.driveme.backend.repository.PassengerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -24,6 +27,7 @@ public class AuthService {
 
     private final DriverRepository driverRepository;
     private final PassengerRepository passengerRepository;
+    private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
@@ -34,6 +38,7 @@ public class AuthService {
      * @return login response with token and user details
      * @throws IllegalArgumentException if credentials are invalid
      */
+    @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
         log.info("Attempting to authenticate user with email: {}", request.getEmail());
 
@@ -109,7 +114,40 @@ public class AuthService {
                     .build();
         }
 
-        // User not found
+        // Try to find user as admin
+        Optional<Admin> adminOpt = adminRepository.findByEmail(request.getEmail());
+        if (adminOpt.isPresent()) {
+            Admin admin = adminOpt.get();
+
+            if (!admin.isActive()) {
+                log.warn("Login failed: Admin account is inactive - {}", request.getEmail());
+                throw new IllegalArgumentException("Account is inactive");
+            }
+
+            if (!passwordEncoder.matches(request.getPassword(), admin.getPasswordHash())) {
+                log.warn("Login failed: Invalid password for admin - {}", request.getEmail());
+                throw new IllegalArgumentException("Invalid email or password");
+            }
+
+            String token = jwtUtil.generateToken(
+                admin.getEmail(),
+                admin.getId().toString(),
+                "ADMIN"
+            );
+
+            log.info("Admin successfully authenticated: {}", admin.getId());
+
+            return LoginResponse.builder()
+                    .token(token)
+                    .userType("ADMIN")
+                    .userId(admin.getId().toString())
+                    .email(admin.getEmail())
+                    .fullName(admin.getFullName())
+                    .userName(admin.getUserName())
+                    .build();
+        }
+
+        // User not found in any table
         log.warn("Login failed: User not found - {}", request.getEmail());
         throw new IllegalArgumentException("Invalid email or password");
     }

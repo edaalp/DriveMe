@@ -3,6 +3,7 @@ package com.driveme.backend.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -39,6 +40,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -49,17 +51,22 @@ public class SecurityConfig {
                     "/api/auth/login",
                     "/api/passengers/signup",
                     "/api/drivers/signup",
+                    "/api/admin/signup",
                     // Swagger UI
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/swagger-ui.html",
                     // Payment endpoints (demo mode - should require auth in production)
-                    "/api/payments/**",
+                    "/api/payments", "/api/payments/**",
                     // Penalty endpoints (demo mode - should require auth in production)
-                    "/api/penalties/**",
+                    "/api/penalties", "/api/penalties/**",
                     // Actuator endpoints
-                    "/actuator/**"
+                    "/actuator/**",
+                    // Error endpoint (so validation/error responses aren't blocked)
+                    "/error"
                 ).permitAll()
+                // Admin endpoints require ADMIN role
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

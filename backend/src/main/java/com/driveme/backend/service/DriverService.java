@@ -1,5 +1,7 @@
 package com.driveme.backend.service;
 
+import com.driveme.backend.common.VerificationStatus;
+import com.driveme.backend.dto.DriverResponse;
 import com.driveme.backend.dto.DriverSignUpRequest;
 import com.driveme.backend.entity.Driver;
 import com.driveme.backend.helper.DriverMapper;
@@ -11,7 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing driver operations.
@@ -72,6 +77,7 @@ public class DriverService {
      * @param email the email to search for
      * @return optional containing the driver if found
      */
+    @Transactional(readOnly = true)
     public Optional<Driver> findByEmail(String email) {
         return driverRepository.findByEmail(email);
     }
@@ -96,5 +102,46 @@ public class DriverService {
         
         log.info("Driver {} availability updated to: {}", driverId, available);
         return updatedDriver;
+    }
+
+    // ---- Admin verification methods ----
+
+    @Transactional(readOnly = true)
+    public List<DriverResponse> getDriversByVerificationStatus(VerificationStatus status) {
+        return driverRepository.findByVerificationStatus(status)
+                .stream()
+                .map(driverMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<DriverResponse> getAllDrivers() {
+        return driverRepository.findAll()
+                .stream()
+                .map(driverMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public DriverResponse verifyDriver(UUID driverId, VerificationStatus decision, String reason) {
+        Driver driver = driverRepository.findById(driverId)
+                .orElseThrow(() -> new IllegalArgumentException("Driver not found with id: " + driverId));
+
+        if (decision == VerificationStatus.PENDING) {
+            throw new IllegalArgumentException("Decision must be VERIFIED or REJECTED");
+        }
+
+        driver.setVerificationStatus(decision);
+        driver.setRejectionReason(decision == VerificationStatus.REJECTED ? reason : null);
+
+        Driver saved = driverRepository.save(driver);
+        log.info("Driver {} verification updated to: {}", driverId, decision);
+        return driverMapper.toResponse(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public Driver getDriverEntityById(UUID driverId) {
+        return driverRepository.findById(driverId)
+                .orElseThrow(() -> new IllegalArgumentException("Driver not found with id: " + driverId));
     }
 }
