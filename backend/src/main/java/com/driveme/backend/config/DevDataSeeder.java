@@ -165,7 +165,7 @@ public class DevDataSeeder implements CommandLineRunner {
         d1.setLicenseNumber("ANK-2020-12345");
         d1.setDriverLicenseNumber("B-987654");
         d1.setTckNo(12345678901L);
-        d1.setLicanseIssueDate(new Date(1577836800000L)); // 2020-01-01
+        d1.setLicenseIssueDate(new Date(1577836800000L)); // 2020-01-01
         d1.setAvailable(true);
         d1.setMaxPickupRadiusKm(10.0);
         d1.setMaxDropoffRadiusKm(50.0);
@@ -187,7 +187,7 @@ public class DevDataSeeder implements CommandLineRunner {
         d2.setLicenseNumber("IST-2019-67890");
         d2.setDriverLicenseNumber("B-123456");
         d2.setTckNo(98765432109L);
-        d2.setLicanseIssueDate(new Date(1546300800000L)); // 2019-01-01
+        d2.setLicenseIssueDate(new Date(1546300800000L)); // 2019-01-01
         d2.setAvailable(false);
         d2.setMaxPickupRadiusKm(5.0);
         d2.setMaxDropoffRadiusKm(30.0);
@@ -209,7 +209,7 @@ public class DevDataSeeder implements CommandLineRunner {
         d3.setLicenseNumber("IZM-2021-11111");
         d3.setDriverLicenseNumber("B-555666");
         d3.setTckNo(11223344556L);
-        d3.setLicanseIssueDate(new Date(1609459200000L)); // 2021-01-01
+        d3.setLicenseIssueDate(new Date(1609459200000L)); // 2021-01-01
         d3.setAvailable(true);
         d3.setMaxPickupRadiusKm(8.0);
         d3.setMaxDropoffRadiusKm(40.0);
@@ -229,7 +229,7 @@ public class DevDataSeeder implements CommandLineRunner {
         d4.setLicenseNumber("IST-2018-99999");
         d4.setDriverLicenseNumber("B-111222");
         d4.setTckNo(99887766554L);
-        d4.setLicanseIssueDate(new Date(1514764800000L)); // 2018-01-01
+        d4.setLicenseIssueDate(new Date(1514764800000L)); // 2018-01-01
         d4.setAvailable(true);
         d4.setMaxPickupRadiusKm(15.0);
         d4.setMaxDropoffRadiusKm(60.0);

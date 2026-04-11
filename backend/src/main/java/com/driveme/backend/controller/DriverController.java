@@ -9,8 +9,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 /**
  * REST controller for driver operations.
@@ -25,20 +31,24 @@ public class DriverController {
     private final DriverMapper driverMapper;
 
     /**
-     * Sign up a new driver.
-     * 
-     * @param request the sign-up request containing driver details
+     * Sign up a new driver (multipart: JSON {@code driver} + license and criminal record files).
+     *
+     * @param request driver fields as JSON
+     * @param licenseFile license document
+     * @param criminalRecordFile criminal record document
      * @return the created driver
      */
-    @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@Valid @RequestBody DriverSignUpRequest request) {
+    @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> signUp(
+            @Valid @RequestPart("driver") DriverSignUpRequest request,
+            @RequestPart("licenseFile") MultipartFile licenseFile,
+            @RequestPart("criminalRecordFile") MultipartFile criminalRecordFile) {
         try {
-            log.info("Received sign-up request for email: {}", request.getEmail());
-            Driver driver = driverService.signUp(request);
-            
-            // Convert to response DTO using mapper
+            log.info("Received multipart sign-up request for email: {}", request.getEmail());
+            Driver driver = driverService.signUp(request, licenseFile, criminalRecordFile);
+
             DriverResponse response = driverMapper.toResponse(driver);
-            
+
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
             log.error("Sign-up failed: {}", e.getMessage());
@@ -52,8 +62,33 @@ public class DriverController {
     }
 
     /**
+     * Current authenticated driver's profile (JWT subject is driver id).
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentDriver(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        boolean isDriver = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ROLE_DRIVER"::equals);
+        if (!isDriver) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponse("Only drivers can access this resource"));
+        }
+        try {
+            UUID id = UUID.fromString(authentication.getPrincipal().toString());
+            Driver driver = driverService.getDriverEntityById(id);
+            return ResponseEntity.ok(driverMapper.toResponse(driver));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
      * Get driver by email.
-     * 
+     *
      * @param email the email to search for
      * @return the driver if found
      */
@@ -67,7 +102,7 @@ public class DriverController {
 
     /**
      * Update driver availability status.
-     * 
+     *
      * @param driverId the driver ID
      * @param request the availability update request
      * @return the updated driver
@@ -95,7 +130,7 @@ public class DriverController {
      * Simple error response class.
      */
     private record ErrorResponse(String message) {}
-    
+
     /**
      * Request body for updating driver availability.
      */

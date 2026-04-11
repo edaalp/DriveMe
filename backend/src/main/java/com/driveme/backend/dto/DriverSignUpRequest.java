@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 /**
- * Data Transfer Object for driver sign-up request.
+ * Data Transfer Object for driver sign-up request (JSON part of multipart signup).
  */
 @Data
 @NoArgsConstructor
@@ -26,14 +26,24 @@ public class DriverSignUpRequest {
 
     private String licenseNumber;
 
+    /** Optional; server applies defaults when null. */
+    private String vehicleDescription;
+
+    private Double maxPickupRadiusKm;
+
+    private Double maxDropoffRadiusKm;
+
+    private Boolean acceptsPets;
+
     private long tckNo;
 
     private String driverLicenseNumber;
 
     private Date licenseIssueDate;
 
-    // Base64 encoded criminal record file
-    private String criminalRecordFile;
+    /** Original filename of the license upload (optional; also sent as multipart file). */
+    private String driverLicenseFileName;
 
+    /** Original filename of the criminal record upload (optional; also sent as multipart file). */
     private String criminalRecordFileName;
 }

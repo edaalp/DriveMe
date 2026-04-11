@@ -8,6 +8,7 @@ import com.driveme.backend.dto.VerificationDecisionRequest;
 import com.driveme.backend.entity.Admin;
 import com.driveme.backend.entity.Driver;
 import com.driveme.backend.entity.Vehicle;
+import com.driveme.backend.helper.DriverMapper;
 import com.driveme.backend.service.AdminService;
 import com.driveme.backend.service.DriverService;
 import com.driveme.backend.service.VehicleService;
@@ -40,6 +41,7 @@ public class AdminController {
     private final AdminService adminService;
     private final VehicleService vehicleService;
     private final DriverService driverService;
+    private final DriverMapper driverMapper;
 
     @Value("${admin.signup-secret}")
     private String signupSecret;
@@ -142,7 +144,7 @@ public class AdminController {
     @Operation(summary = "Get driver detail", description = "Get full driver details for admin review")
     public ResponseEntity<DriverResponse> getDriverById(@PathVariable UUID id) {
         Driver driver = driverService.getDriverEntityById(id);
-        return ResponseEntity.ok(new com.driveme.backend.helper.DriverMapper().toResponse(driver));
+        return ResponseEntity.ok(driverMapper.toResponse(driver));
     }
 
     @PutMapping("/drivers/{id}/verify")

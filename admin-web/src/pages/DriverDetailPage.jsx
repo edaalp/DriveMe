@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import api from "../api";
+import api, { hasDocumentUrl, openDocumentUrl } from "../api";
 
 export default function DriverDetailPage() {
   const { id } = useParams();
@@ -8,7 +8,8 @@ export default function DriverDetailPage() {
   const [reason, setReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
 
-  const [docUrl, setDocUrl] = useState(null);
+  /** Legacy blob preview when API has no public criminal-record URL (old rows). */
+  const [criminalBlobUrl, setCriminalBlobUrl] = useState(null);
 
   const load = () => {
     api.get(`/admin/drivers/${id}`).then((res) => setDriver(res.data));
@@ -16,18 +17,44 @@ export default function DriverDetailPage() {
 
   useEffect(() => {
     load();
+  }, [id]);
+
+  useEffect(() => {
+    if (!driver) return;
+
+    if (hasDocumentUrl(driver.criminalRecordDocumentUrl)) {
+      setCriminalBlobUrl(null);
+      return;
+    }
+
+    const urlRef = { current: null };
+    let cancelled = false;
+
     api
       .get(`/admin/drivers/${id}/document/criminal-record`, {
         responseType: "blob",
       })
       .then((res) => {
+        if (cancelled) return;
         const blob = new Blob([res.data], {
           type: res.headers["content-type"],
         });
-        setDocUrl(URL.createObjectURL(blob));
+        urlRef.current = URL.createObjectURL(blob);
+        setCriminalBlobUrl(urlRef.current);
       })
-      .catch(() => setDocUrl(null));
-  }, [id]);
+      .catch(() => {
+        if (!cancelled) setCriminalBlobUrl(null);
+      });
+
+    return () => {
+      cancelled = true;
+      if (urlRef.current) {
+        URL.revokeObjectURL(urlRef.current);
+        urlRef.current = null;
+      }
+      setCriminalBlobUrl(null);
+    };
+  }, [driver, id]);
 
   const handleVerify = async (decision) => {
     if (decision === "REJECTED" && !reason.trim()) {
@@ -47,6 +74,12 @@ export default function DriverDetailPage() {
   };
 
   if (!driver) return <div className="loading">Loading...</div>;
+
+  const licenseUrl = driver.driverLicenseDocumentUrl;
+  const criminalUrl = driver.criminalRecordDocumentUrl;
+  const criminalPreviewSrc = hasDocumentUrl(criminalUrl)
+    ? criminalUrl.trim()
+    : criminalBlobUrl;
 
   return (
     <div>
@@ -75,7 +108,9 @@ export default function DriverDetailPage() {
           </div>
           <div className="info-item">
             <div className="label">License Number</div>
-            <div className="value">{driver.driverLicenseNumber || driver.licenseNumber}</div>
+            <div className="value">
+              {driver.driverLicenseNumber || driver.licenseNumber}
+            </div>
           </div>
           <div className="info-item">
             <div className="label">TCK No</div>
@@ -114,17 +149,43 @@ export default function DriverDetailPage() {
         )}
       </div>
 
-      {driver.criminalRecordFileName && docUrl && (
+      <div className="card" style={{ marginTop: "1rem" }}>
+        <h3 style={{ marginBottom: "0.75rem" }}>Documents</h3>
+        <p style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
+          Open files in a new browser tab. URLs are served from the API
+          <code style={{ marginLeft: "0.35rem" }}>/uploads/</code> path.
+        </p>
+        <div className="actions-bar" style={{ flexWrap: "wrap", gap: "0.5rem" }}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={!hasDocumentUrl(licenseUrl)}
+            onClick={() => openDocumentUrl(licenseUrl)}
+          >
+            Open license (new tab)
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={!hasDocumentUrl(criminalUrl)}
+            onClick={() => openDocumentUrl(criminalUrl)}
+          >
+            Open criminal record (new tab)
+          </button>
+        </div>
+      </div>
+
+      {driver.criminalRecordFileName && criminalPreviewSrc && (
         <div className="card" style={{ marginTop: "1rem" }}>
-          <h3 style={{ marginBottom: "0.75rem" }}>Criminal Record</h3>
+          <h3 style={{ marginBottom: "0.75rem" }}>Criminal Record Preview</h3>
           <p style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
             {driver.criminalRecordFileName}
           </p>
           <div className="document-preview">
             {driver.criminalRecordFileName?.toLowerCase().endsWith(".pdf") ? (
-              <iframe src={docUrl} title="Criminal record" />
+              <iframe src={criminalPreviewSrc} title="Criminal record" />
             ) : (
-              <img src={docUrl} alt="Criminal record" />
+              <img src={criminalPreviewSrc} alt="Criminal record" />
             )}
           </div>
         </div>

@@ -75,6 +75,7 @@ public class AuthService {
                     .email(driver.getEmail())
                     .fullName(driver.getFullName())
                     .userName(driver.getUserName())
+                    .verificationStatus(driver.getVerificationStatus().name())
                     .build();
         }
 

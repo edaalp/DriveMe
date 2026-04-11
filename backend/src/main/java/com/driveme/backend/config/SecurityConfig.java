@@ -51,6 +51,7 @@ public class SecurityConfig {
                     "/api/auth/login",
                     "/api/passengers/signup",
                     "/api/drivers/signup",
+                    "/uploads/**",
                     "/api/admin/signup",
                     // Swagger UI
                     "/swagger-ui/**",

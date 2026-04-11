@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
+import api, { hasDocumentUrl, openDocumentUrl } from "../api";
 
 const STATUSES = ["ALL", "PENDING", "VERIFIED", "REJECTED"];
 
@@ -51,6 +51,8 @@ export default function DriversPage() {
                 <th>Phone</th>
                 <th>License #</th>
                 <th>Rating</th>
+                <th>License PDF</th>
+                <th>Criminal PDF</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -66,6 +68,38 @@ export default function DriversPage() {
                   <td>{d.phoneNumber}</td>
                   <td>{d.driverLicenseNumber || d.licenseNumber}</td>
                   <td>{d.avgRating?.toFixed(1)}</td>
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline"
+                      disabled={!hasDocumentUrl(d.driverLicenseDocumentUrl)}
+                      title={
+                        hasDocumentUrl(d.driverLicenseDocumentUrl)
+                          ? "Open license document"
+                          : "No license file"
+                      }
+                      onClick={() => openDocumentUrl(d.driverLicenseDocumentUrl)}
+                    >
+                      PDF
+                    </button>
+                  </td>
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline"
+                      disabled={!hasDocumentUrl(d.criminalRecordDocumentUrl)}
+                      title={
+                        hasDocumentUrl(d.criminalRecordDocumentUrl)
+                          ? "Open criminal record"
+                          : "No criminal record file"
+                      }
+                      onClick={() =>
+                        openDocumentUrl(d.criminalRecordDocumentUrl)
+                      }
+                    >
+                      PDF
+                    </button>
+                  </td>
                   <td>
                     <span
                       className={`badge badge-${d.verificationStatus?.toLowerCase()}`}

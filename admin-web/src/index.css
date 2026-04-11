@@ -239,6 +239,21 @@ tr.clickable {
   cursor: not-allowed;
 }
 
+.btn-sm {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: rgba(6, 182, 212, 0.12);
+}
+
 /* ---- Forms ---- */
 .form-group {
   margin-bottom: 1rem;

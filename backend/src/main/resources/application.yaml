@@ -3,6 +3,10 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   application:
     name: driveme-backend
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 15MB
   
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://127.0.0.1:5433/driveme}
@@ -28,6 +32,12 @@ spring:
 
 admin:
   signup-secret: ${ADMIN_SIGNUP_SECRET:driveme-admin-secret-2026}
+
+app:
+  upload:
+    dir: ${APP_UPLOAD_DIR:uploads}
+  # Public origin for absolute document URLs in API responses (no trailing slash).
+  public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
 
 logging:
   level:
