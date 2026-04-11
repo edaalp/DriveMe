@@ -1,5 +1,7 @@
 package com.driveme.backend.service;
 
+import com.driveme.backend.common.VerificationStatus;
+import com.driveme.backend.dto.DriverResponse;
 import com.driveme.backend.dto.DriverSignUpRequest;
 import com.driveme.backend.entity.Driver;
 import com.driveme.backend.helper.DriverMapper;
@@ -7,11 +9,23 @@ import com.driveme.backend.repository.DriverRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing driver operations.
@@ -25,40 +39,53 @@ public class DriverService {
     private final DriverMapper driverMapper;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${app.upload.dir:uploads}")
+    private String uploadDir;
+
     /**
-     * Register a new driver.
-     * 
-     * @param request the sign-up request
+     * Register a new driver with uploaded documents.
+     *
+     * @param request the sign-up request (JSON part)
+     * @param licenseFile driver's license scan
+     * @param criminalRecordFile criminal record certificate
      * @return the created driver
-     * @throws IllegalArgumentException if email already exists or passwords don't match
+     * @throws IllegalArgumentException if validation fails
      */
     @Transactional
-    public Driver signUp(@Valid  DriverSignUpRequest request) {
-        //removed @org.checkerframework.checker.nullness.qual.MonotonicNonNull
+    public Driver signUp(
+            @Valid DriverSignUpRequest request,
+            MultipartFile licenseFile,
+            MultipartFile criminalRecordFile) {
         log.info("Attempting to sign up driver with email: {}", request.getEmail());
 
-        // Validate password confirmation
+        if (licenseFile == null || licenseFile.isEmpty()) {
+            throw new IllegalArgumentException("License file is required");
+        }
+        if (criminalRecordFile == null || criminalRecordFile.isEmpty()) {
+            throw new IllegalArgumentException("Criminal record file is required");
+        }
+
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             log.warn("Sign up failed: Passwords do not match");
             throw new IllegalArgumentException("Passwords do not match");
         }
 
-        // Check if email already exists
         if (driverRepository.findByEmail(request.getEmail()).isPresent()) {
             log.warn("Sign up failed: Email already exists - {}", request.getEmail());
             throw new IllegalArgumentException("Email already exists");
         }
 
-        // Validate TCK number (should be 11 digits)
-        Long tckNo = request.getTckNo();
-        if (tckNo != null && String.valueOf(tckNo).length() != 11) {
+        long tckNo = request.getTckNo();
+        if (String.valueOf(tckNo).length() != 11) {
             log.warn("Sign up failed: Invalid TCK number");
             throw new IllegalArgumentException("TCK number must be 11 digits");
         }
 
-        // Create new driver
+        String licenseUrl = storeDriverDocument(licenseFile);
+        String criminalUrl = storeDriverDocument(criminalRecordFile);
+
         String hashedPassword = passwordEncoder.encode(request.getPassword());
-        Driver driver = driverMapper.toEntity(request, hashedPassword);
+        Driver driver = driverMapper.toEntity(request, hashedPassword, licenseUrl, criminalUrl);
 
         Driver savedDriver = driverRepository.save(driver);
         log.info("Driver successfully signed up with ID: {}", savedDriver.getId());
@@ -66,19 +93,111 @@ public class DriverService {
         return savedDriver;
     }
 
+    private String storeDriverDocument(MultipartFile file) {
+        String original = file.getOriginalFilename();
+        if (original == null || original.isBlank()) {
+            original = "document";
+        }
+        String safeName = Paths.get(original).getFileName().toString();
+        if (safeName.contains("..")) {
+            throw new IllegalArgumentException("Invalid filename");
+        }
+
+        String storedName = buildSanitizedStoredFilename(safeName);
+
+        Path dir = Paths.get(uploadDir, "drivers").toAbsolutePath().normalize();
+        try {
+            Files.createDirectories(dir);
+            Path target = dir.resolve(storedName);
+            try (InputStream in = file.getInputStream()) {
+                Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException e) {
+            log.error("Failed to store driver document", e);
+            throw new IllegalArgumentException("Could not store uploaded file");
+        }
+
+        return "/uploads/drivers/" + storedName;
+    }
+
+    /**
+     * Produces a URL-safe stored name: sanitized original stem + UUID + ASCII extension
+     * (spaces to underscores, Turkish letters transliterated).
+     */
+    private static String buildSanitizedStoredFilename(String safeName) {
+        int dot = safeName.lastIndexOf('.');
+        String base = dot > 0 ? safeName.substring(0, dot) : safeName;
+        String rawExt = (dot >= 0 && dot < safeName.length() - 1)
+                ? safeName.substring(dot + 1)
+                : "";
+
+        String cleanStem = sanitizeFilenamePart(base, 80);
+        if (cleanStem.isEmpty()) {
+            cleanStem = "document";
+        }
+        String cleanExt = sanitizeExtension(rawExt);
+        return cleanStem + "_" + UUID.randomUUID() + "." + cleanExt;
+    }
+
+    private static String sanitizeExtension(String rawExt) {
+        String part = sanitizeFilenamePart(rawExt, 12);
+        if (part.isEmpty()) {
+            return "bin";
+        }
+        return part;
+    }
+
+    /**
+     * Keeps only [a-z0-9_] after transliteration; spaces become underscores.
+     */
+    private static String sanitizeFilenamePart(String input, int maxLen) {
+        if (input == null || input.isBlank()) {
+            return "";
+        }
+        String t = input.trim().replace(' ', '_');
+        t = transliterateTurkishToAscii(t);
+        t = t.toLowerCase(Locale.ROOT);
+        t = t.replaceAll("[^a-z0-9_]", "");
+        if (t.length() > maxLen) {
+            t = t.substring(0, maxLen);
+        }
+        return t;
+    }
+
+    private static String transliterateTurkishToAscii(String s) {
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
+        StringBuilder sb = new StringBuilder(s.length());
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            sb.append(switch (c) {
+                case 'ç', 'Ç' -> 'c';
+                case 'ğ', 'Ğ' -> 'g';
+                case 'ı', 'İ' -> 'i';
+                case 'ö', 'Ö' -> 'o';
+                case 'ş', 'Ş' -> 's';
+                case 'ü', 'Ü' -> 'u';
+                default -> c;
+            });
+        }
+        return sb.toString();
+    }
+
     /**
      * Find driver by email.
-     * 
+     *
      * @param email the email to search for
      * @return optional containing the driver if found
      */
+    @Transactional(readOnly = true)
     public Optional<Driver> findByEmail(String email) {
         return driverRepository.findByEmail(email);
     }
 
     /**
      * Update driver availability status.
-     * 
+     *
      * @param driverId the driver ID
      * @param available the new availability status
      * @return the updated driver
@@ -87,14 +206,55 @@ public class DriverService {
     @Transactional
     public Driver updateAvailability(String driverId, boolean available) {
         log.info("Updating availability for driver: {}", driverId);
-        
+
         Driver driver = driverRepository.findById(java.util.UUID.fromString(driverId))
                 .orElseThrow(() -> new IllegalArgumentException("Driver not found"));
-        
+
         driver.setAvailable(available);
         Driver updatedDriver = driverRepository.save(driver);
-        
+
         log.info("Driver {} availability updated to: {}", driverId, available);
         return updatedDriver;
+    }
+
+    // ---- Admin verification methods ----
+
+    @Transactional(readOnly = true)
+    public List<DriverResponse> getDriversByVerificationStatus(VerificationStatus status) {
+        return driverRepository.findByVerificationStatus(status)
+                .stream()
+                .map(driverMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<DriverResponse> getAllDrivers() {
+        return driverRepository.findAll()
+                .stream()
+                .map(driverMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public DriverResponse verifyDriver(UUID driverId, VerificationStatus decision, String reason) {
+        Driver driver = driverRepository.findById(driverId)
+                .orElseThrow(() -> new IllegalArgumentException("Driver not found with id: " + driverId));
+
+        if (decision == VerificationStatus.PENDING) {
+            throw new IllegalArgumentException("Decision must be VERIFIED or REJECTED");
+        }
+
+        driver.setVerificationStatus(decision);
+        driver.setRejectionReason(decision == VerificationStatus.REJECTED ? reason : null);
+
+        Driver saved = driverRepository.save(driver);
+        log.info("Driver {} verification updated to: {}", driverId, decision);
+        return driverMapper.toResponse(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public Driver getDriverEntityById(UUID driverId) {
+        return driverRepository.findById(driverId)
+                .orElseThrow(() -> new IllegalArgumentException("Driver not found with id: " + driverId));
     }
 }

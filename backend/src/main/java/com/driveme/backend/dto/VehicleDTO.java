@@ -26,7 +26,13 @@ public class VehicleDTO {
     private Integer year;
     private TransmissionType transmission;
     private VerificationStatus status;
+    private String rejectionReason;
+    private boolean hasDocument;
+    private String documentFileName;
     private UUID passengerId;
+    private String ownerFullName;
+    private String ownerEmail;
+    private String ownerPhoneNumber;
     private Instant createdAt;
     private Instant updatedAt;
 

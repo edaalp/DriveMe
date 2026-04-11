@@ -1,0 +1,28 @@
+package com.driveme.backend.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+/**
+ * Exposes on-disk upload directory as static resources under {@code /uploads/**}.
+ */
+@Configuration
+public class WebMvcUploadConfig implements WebMvcConfigurer {
+
+    @Value("${app.upload.dir:uploads}")
+    private String uploadDir;
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        Path root = Paths.get(uploadDir).toAbsolutePath().normalize();
+        String location = "file:" + root + "/";
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations(location)
+                .setCachePeriod(3600);
+    }
+}
