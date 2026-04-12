@@ -43,3 +43,41 @@ logging:
   level:
     root: INFO
     com.driveme.backend: INFO
+
+# Pricing configuration
+pricing:
+  # Base fare in TRY (Turkish Lira)
+  baseFare: ${PRICING_BASE_FARE:20.0}
+
+  # Rate per kilometer in TRY
+  perKmRate: ${PRICING_PER_KM_RATE:8.0}
+
+  # Rate per minute in TRY
+  perMinuteRate: ${PRICING_PER_MINUTE_RATE:1.0}
+
+  # Maximum surge multiplier cap
+  maxSurgeMultiplier: ${PRICING_MAX_SURGE:3.0}
+
+  # Default currency
+  currency: ${PRICING_CURRENCY:TRY}
+
+  # Price range percentages (minPrice = base * 0.9, maxPrice = base * 1.1)
+  minPricePercentage: ${PRICING_MIN_PERCENTAGE:0.9}
+  maxPricePercentage: ${PRICING_MAX_PERCENTAGE:1.1}
+
+  # Google Maps configuration
+  useGoogleMaps: ${PRICING_USE_GOOGLE_MAPS:false}
+  googleMapsApiKey: ${GOOGLE_MAPS_API_KEY:}
+
+  # Rush hour configuration (UTC+3 for Istanbul)
+  rushHourStartMorning: ${PRICING_RUSH_HOUR_START_MORNING:7}
+  rushHourEndMorning: ${PRICING_RUSH_HOUR_END_MORNING:10}
+  rushHourStartEvening: ${PRICING_RUSH_HOUR_START_EVENING:17}
+  rushHourEndEvening: ${PRICING_RUSH_HOUR_END_EVENING:20}
+  rushHourMultiplier: ${PRICING_RUSH_HOUR_MULTIPLIER:1.2}
+
+  # Night time configuration
+  nightTimeStart: ${PRICING_NIGHT_TIME_START:22}
+  nightTimeEnd: ${PRICING_NIGHT_TIME_END:6}
+  nightTimeMultiplier: ${PRICING_NIGHT_TIME_MULTIPLIER:1.1}
+

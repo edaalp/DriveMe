@@ -3,10 +3,7 @@ package com.driveme.backend.service;
 import com.driveme.backend.common.Location;
 import com.driveme.backend.common.Money;
 import com.driveme.backend.common.RequestStatus;
-import com.driveme.backend.dto.CreateTripRequestRequest;
-import com.driveme.backend.dto.LocationDTO;
-import com.driveme.backend.dto.PriceRangeDTO;
-import com.driveme.backend.dto.TripRequestDTO;
+import com.driveme.backend.dto.*;
 import com.driveme.backend.entity.Passenger;
 import com.driveme.backend.entity.TripRequest;
 import com.driveme.backend.entity.Vehicle;
@@ -14,7 +11,9 @@ import com.driveme.backend.helper.TripRequestMapper;
 import com.driveme.backend.repository.PassengerRepository;
 import com.driveme.backend.repository.TripRequestRepository;
 import com.driveme.backend.repository.VehicleRepository;
+import com.driveme.backend.service.pricing.PricingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,11 +28,13 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TripRequestService {
 
     private final TripRequestRepository tripRequestRepository;
     private final PassengerRepository passengerRepository;
     private final VehicleRepository vehicleRepository;
+    private final PricingService pricingService;
 
     // Price calculation constants (TL per km)
     private static final BigDecimal MIN_PRICE_PER_KM = new BigDecimal("12.00");
@@ -43,6 +44,8 @@ public class TripRequestService {
 
     /**
      * Create a new trip request.
+     * The pricing is calculated server-side using the PricingService.
+     * This ensures the official price is computed consistently and securely.
      */
     @Transactional
     public TripRequestDTO createTripRequest(UUID passengerId, CreateTripRequestRequest request) {
@@ -66,12 +69,27 @@ public class TripRequestService {
         // Create trip request
         TripRequest tripRequest = TripRequestMapper.toEntity(request, passenger, vehicle);
 
-        // Calculate price range based on distance
-        PriceRangeDTO priceRange = calculatePriceRange(request.getPickup(), request.getDestination());
-        tripRequest.setMinPrice(Money.ofTRY(priceRange.getMinPrice()));
-        tripRequest.setMaxPrice(Money.ofTRY(priceRange.getMaxPrice()));
+        // Calculate price using the centralized PricingService
+        // This is the official price that will be persisted
+        Location pickup = TripRequestMapper.toLocation(request.getPickup());
+        Location destination = TripRequestMapper.toLocation(request.getDestination());
+
+        PricingResult pricingResult = pricingService.calculatePrice(
+                pickup,
+                destination,
+                vehicle,
+                request.isWithPet(),
+                request.getRequestedTime(),
+                passenger
+        );
+
+        // Persist the calculated prices
+        tripRequest.setMinPrice(Money.ofTRY(pricingResult.getMinPrice()));
+        tripRequest.setMaxPrice(Money.ofTRY(pricingResult.getMaxPrice()));
 
         TripRequest savedRequest = tripRequestRepository.save(tripRequest);
+        log.info("Trip request created with ID {} and price range {} - {}",
+                savedRequest.getId(), pricingResult.getMinPrice(), pricingResult.getMaxPrice());
         return TripRequestMapper.toDTO(savedRequest);
     }
 
