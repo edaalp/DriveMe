@@ -15,9 +15,9 @@ Client Request (Flutter)
          ↓
     Controller Layer (TripPricingController)
          ↓
-    Service Layer (TripRequestService, PricingService)
+    Service Layer (TripRequestService, com.driveme.backend.service.pricing.PricingService)
          ↓
-    Pricing Engine (PricingService + 4 helper services)
+    Pricing Engine (com.driveme.backend.service.pricing.PricingService + 4 helper services)
          ↓
     Database / External APIs
          ↓
@@ -177,7 +177,7 @@ public double calculateWeatherMultiplier(Location location, Instant time) {
 
 ### 3. Adding Loyalty Discounts
 
-**Location**: Modify `PricingService.calculatePrice()`
+**Location**: Modify `com.driveme.backend.service.pricing.PricingService.calculatePrice()`
 
 **Implementation**:
 
@@ -192,7 +192,7 @@ public double calculateWeatherMultiplier(Location location, Instant time) {
    }
    ```
 
-2. **Add loyalty multiplier to PricingService**
+2. **Add loyalty multiplier to com.driveme.backend.service.pricing.PricingService**
    ```java
    public PricingResult calculatePrice(
            Location pickup,
@@ -246,7 +246,7 @@ public double calculateWeatherMultiplier(Location location, Instant time) {
 @Slf4j
 public class MLPricingService {
     
-    private final PricingService fallbackPricingService;
+    private final com.driveme.backend.service.pricing.PricingService fallbackPricingService;
     private final MLModel mlModel;  // Your ML model
     
     public double predictPrice(Location pickup, Location destination, 
@@ -421,7 +421,7 @@ public class GeolocationPricingService {
 public class PricingServiceExtensionTest {
     
     @Autowired
-    private PricingService pricingService;
+    private com.driveme.backend.service.pricing.PricingService pricingService;
     
     @MockBean
     private RoutingService routingService;
@@ -517,7 +517,7 @@ public class PricingMetrics {
 @Slf4j
 public class CachedPricingService {
     
-    private final PricingService pricingService;
+    private final com.driveme.backend.service.pricing.PricingService pricingService;
     private final Cache<String, PricingResult> priceCache = 
         CacheBuilder.newBuilder()
             .expireAfterWrite(5, TimeUnit.MINUTES)

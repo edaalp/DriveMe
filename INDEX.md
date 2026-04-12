@@ -37,7 +37,7 @@ A production-ready, backend-driven pricing system for DriveMe ride-hailing app h
 #### Services (5 files - Core Engine)
 | File | Lines | Purpose |
 |------|-------|---------|
-| `service/pricing/PricingService.java` | 143 | **MAIN**: Orchestrates all pricing (single source of truth) |
+| `service/pricing/com.driveme.backend.service.pricing.PricingService.java` | 143 | **MAIN**: Orchestrates all pricing (single source of truth) |
 | `service/pricing/RoutingService.java` | 110 | Distance/duration: Google Maps + Haversine fallback |
 | `service/pricing/DemandSupplyService.java` | 78 | Surge pricing (stub, ready for real data) |
 | `service/pricing/TimePricingService.java` | 95 | Time-based multipliers (rush hour, night) |
@@ -52,7 +52,7 @@ A production-ready, backend-driven pricing system for DriveMe ride-hailing app h
 
 | File | Changes |
 |------|---------|
-| `service/TripRequestService.java` | Integrated PricingService, official pricing on creation |
+| `service/TripRequestService.java` | Integrated com.driveme.backend.service.pricing.PricingService, official pricing on creation |
 | `controller/TripRequestController.java` | Removed duplicate price endpoints |
 | `src/main/resources/application.yaml` | Added complete [pricing] configuration section |
 | `pom.xml` | Added Google Maps & SLF4J dependencies |
@@ -99,7 +99,7 @@ A production-ready, backend-driven pricing system for DriveMe ride-hailing app h
 | `POST /trip-requests` | Create trip (official binding) | Full `TripRequest` with persisted pricing |
 
 ### 3. Consistent Pricing ✅
-- Both endpoints use identical PricingService
+- Both endpoints use identical com.driveme.backend.service.pricing.PricingService
 - Preview price = Official price (when same conditions)
 - No divergence possible
 - User sees accurate estimate
@@ -297,14 +297,14 @@ See [DEVELOPERS_GUIDE.md](./DEVELOPERS_GUIDE.md) for performance optimization de
 
 **Loyalty Discounts**
 ```java
-// Add to PricingService.calculatePrice()
+// Add to com.driveme.backend.service.pricing.PricingService.calculatePrice()
 // TODO: Apply passenger loyalty tier multiplier
 ```
 
 **ML Pricing**
 ```java
 // Create new MLPricingService
-// TODO: Wrap PricingService with ML model
+// TODO: Wrap com.driveme.backend.service.pricing.PricingService with ML model
 ```
 
 **Promotional Codes**
@@ -364,7 +364,7 @@ See [COMPLETION_CHECKLIST.md](./COMPLETION_CHECKLIST.md) for full checklist.
 | File organization | [FILE_STRUCTURE.md](./FILE_STRUCTURE.md) |
 
 ### Key Classes
-- **PricingService**: `/service/pricing/PricingService.java`
+- **com.driveme.backend.service.pricing.PricingService**: `/service/pricing/com.driveme.backend.service.pricing.PricingService.java`
 - **TripPricingController**: `/controller/TripPricingController.java`
 - **PricingConfig**: `/config/PricingConfig.java`
 
@@ -378,7 +378,7 @@ See [COMPLETION_CHECKLIST.md](./COMPLETION_CHECKLIST.md) for full checklist.
 
 | Metric | Status | Evidence |
 |--------|--------|----------|
-| Single Source of Truth | ✅ | All endpoints use PricingService |
+| Single Source of Truth | ✅ | All endpoints use com.driveme.backend.service.pricing.PricingService |
 | Consistency Guarantee | ✅ | Identical formula in both endpoints |
 | Security | ✅ | Backend-driven, JWT protected |
 | Error Handling | ✅ | Graceful degradation, detailed logging |

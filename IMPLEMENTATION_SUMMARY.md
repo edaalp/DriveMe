@@ -24,7 +24,7 @@ All required components have been implemented to create a secure, backend-driven
 ### 3. Pricing Services (Core Logic)
 | File | Purpose |
 |------|---------|
-| `service/pricing/PricingService.java` | **MAIN SERVICE**: Orchestrates all pricing calculations (single source of truth) |
+| `service/pricing/com.driveme.backend.service.pricing.PricingService.java` | **MAIN SERVICE**: Orchestrates all pricing calculations (single source of truth) |
 | `service/pricing/RoutingService.java` | Calculates distance/duration via Google Maps or Haversine |
 | `service/pricing/DemandSupplyService.java` | Calculates surge multiplier (extensible stub) |
 | `service/pricing/TimePricingService.java` | Applies time-based multipliers (rush hour, night) |
@@ -38,7 +38,7 @@ All required components have been implemented to create a secure, backend-driven
 ### 5. Modified Files
 | File | Changes |
 |------|---------|
-| `service/TripRequestService.java` | Updated to use PricingService for official pricing |
+| `service/TripRequestService.java` | Updated to use com.driveme.backend.service.pricing.PricingService for official pricing |
 | `controller/TripRequestController.java` | Removed duplicate price calculation endpoints |
 | `pom.xml` | Added Google Maps and SLF4J dependencies |
 | `application.yaml` | Added complete pricing configuration |
@@ -72,12 +72,12 @@ All required components have been implemented to create a secure, backend-driven
                        ▼
         ┌──────────────────────────────┐
         │ TripRequestService           │
-        │ (uses PricingService)        │
+        │ (uses com.driveme.backend.service.pricing.PricingService)        │
         └──────────────────────────────┘
                        │
                        ▼
         ╔══════════════════════════════╗
-        ║   PricingService (CENTER)    ║ ◄─── SINGLE SOURCE OF TRUTH
+        ║   com.driveme.backend.service.pricing.PricingService (CENTER)    ║ ◄─── SINGLE SOURCE OF TRUTH
         ║   Orchestrates all pricing   ║
         ╚══════════════════════════════╝
               │        │        │        │
@@ -122,7 +122,7 @@ All required components have been implemented to create a secure, backend-driven
 
 ✅ **Consistency Guarantee**
 - Preview price uses same formula as official price
-- Both call identical PricingService.calculatePrice()
+- Both call identical com.driveme.backend.service.pricing.PricingService.calculatePrice()
 - No divergence possible
 
 ---
@@ -288,7 +288,7 @@ pricing:
 ```
 
 ### 3. Machine Learning Pricing
-**Location**: Add new `MLPricingService` that wraps PricingService
+**Location**: Add new `MLPricingService` that wraps com.driveme.backend.service.pricing.PricingService
 ```java
 // TODO: Train model on historical data
 // - Time series analysis
@@ -297,7 +297,7 @@ pricing:
 ```
 
 ### 4. Loyalty Discounts
-**Location**: Add to PricingService.calculatePrice()
+**Location**: Add to com.driveme.backend.service.pricing.PricingService.calculatePrice()
 ```java
 // TODO: Apply loyalty tier discounts
 // - Platinum: 5% discount
@@ -404,7 +404,7 @@ docker-compose up
 
 ## Key Guarantees
 
-✅ **Single Source of Truth**: All prices calculated through PricingService
+✅ **Single Source of Truth**: All prices calculated through com.driveme.backend.service.pricing.PricingService
 ✅ **Consistency**: Preview and official prices use identical formula
 ✅ **Security**: No client-side price trust
 ✅ **Extensibility**: Easy to add surge, weather, ML later

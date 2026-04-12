@@ -29,7 +29,7 @@ A secure, backend-driven pricing system for the DriveMe ride-hailing app. All pr
    - Returns: Full `TripRequest` with pricing fields persisted
 
 ### Core Services
-- **PricingService**: Main orchestrator (single source of truth)
+- **com.driveme.backend.service.pricing.PricingService**: Main orchestrator (single source of truth)
 - **RoutingService**: Distance/duration via Google Maps or Haversine
 - **DemandSupplyService**: Surge pricing (ready for real data)
 - **TimePricingService**: Time-based multipliers (rush hour, night)
@@ -69,11 +69,11 @@ pricing:
 ### Backend Code (11 files)
 - 4 DTOs (CalculatePriceRequest, TripPricePreview, PricingResult, ErrorResponse)
 - 1 Configuration (PricingConfig)
-- 5 Services (PricingService, RoutingService, DemandSupplyService, TimePricingService, WeatherPricingService)
+- 5 Services (com.driveme.backend.service.pricing.PricingService, RoutingService, DemandSupplyService, TimePricingService, WeatherPricingService)
 - 1 Controller (TripPricingController)
 
 ### Modified (4 files)
-- TripRequestService.java (integrated PricingService)
+- TripRequestService.java (integrated com.driveme.backend.service.pricing.PricingService)
 - TripRequestController.java (removed duplicates)
 - application.yaml (added pricing config)
 - pom.xml (added Google Maps dependency)
@@ -94,7 +94,7 @@ pricing:
 
 ### For Integration
 1. Read: [PRICING_IMPLEMENTATION.md](./PRICING_IMPLEMENTATION.md)
-2. Review: `src/main/java/com/driveme/backend/service/pricing/PricingService.java`
+2. Review: `src/main/java/com/driveme/backend/service/pricing/com.driveme.backend.service.pricing.PricingService.java`
 3. Configure pricing parameters in `application.yaml`
 
 ### For Development
@@ -220,7 +220,7 @@ See [COMPLETION_CHECKLIST.md](./COMPLETION_CHECKLIST.md) for full checklist.
 
 ## Key Guarantees
 
-✅ **Single Source of Truth**: All prices from PricingService
+✅ **Single Source of Truth**: All prices from com.driveme.backend.service.pricing.PricingService
 ✅ **Consistency**: Preview and official prices use identical formula
 ✅ **Security**: Backend-driven, client sends only coordinates
 ✅ **Extensibility**: Easy to add surge, weather, ML later

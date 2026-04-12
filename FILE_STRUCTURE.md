@@ -28,7 +28,7 @@ src/main/java/com/driveme/backend/config/
 ### New Pricing Services (Core Engine)
 ```
 src/main/java/com/driveme/backend/service/pricing/
-├── PricingService.java
+├── com.driveme.backend.service.pricing.PricingService.java
 │   ├── MAIN ENTRY POINT for all pricing
 │   ├── Orchestrates all pricing calculations
 │   ├── Single source of truth
@@ -74,8 +74,8 @@ src/main/java/com/driveme/backend/controller/
 ```
 src/main/java/com/driveme/backend/service/
 └── TripRequestService.java
-    ├── Added PricingService dependency
-    ├── Updated createTripRequest() to use PricingService
+    ├── Added com.driveme.backend.service.pricing.PricingService dependency
+    ├── Updated createTripRequest() to use com.driveme.backend.service.pricing.PricingService
     ├── Ensures pricing is always server-side calculated
     └── Official price persisted on trip creation
 
@@ -190,7 +190,7 @@ DriveMe/
 - PricingConfig.java
 
 **Services Created**: 5
-- PricingService.java (main)
+- com.driveme.backend.service.pricing.PricingService.java (main)
 - RoutingService.java
 - DemandSupplyService.java
 - TimePricingService.java
@@ -220,7 +220,7 @@ DriveMe/
 
 ### For Understanding the System
 1. Start with: `IMPLEMENTATION_SUMMARY.md`
-2. Then read: `PricingService.java`
+2. Then read: `com.driveme.backend.service.pricing.PricingService.java`
 3. Quick reference: `API_REFERENCE.md`
 
 ### For Implementation Details
@@ -279,7 +279,7 @@ docker-compose up
 - `POST /api/trip-requests/calculate-price` - Price preview (non-binding)
 - `POST /api/trip-requests` - Create trip with official pricing
 
-Both require JWT authentication. Both use PricingService for consistency.
+Both require JWT authentication. Both use com.driveme.backend.service.pricing.PricingService for consistency.
 
 ---
 
@@ -369,7 +369,7 @@ Both require JWT authentication. Both use PricingService for consistency.
 2. **Review Key Services**
    ```bash
    # Most important
-   cat src/main/java/com/driveme/backend/service/pricing/PricingService.java
+   cat src/main/java/com/driveme/backend/service/pricing/com.driveme.backend.service.pricing.PricingService.java
    
    # Supporting services
    cat src/main/java/com/driveme/backend/service/pricing/RoutingService.java

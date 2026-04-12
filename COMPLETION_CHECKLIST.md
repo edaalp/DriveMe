@@ -3,7 +3,7 @@
 ## ✅ Core Implementation Complete
 
 ### Phase 1: Architecture & Design
-- [x] Single source of truth design (PricingService)
+- [x] Single source of truth design (com.driveme.backend.service.pricing.PricingService)
 - [x] Layered architecture (Controller → Service → Pricing Services)
 - [x] Separation of concerns (Routing, Demand, Time, Weather)
 - [x] Extensibility hooks identified and documented
@@ -22,7 +22,7 @@
 - [x] Rush hour, night time, weather configuration included
 
 ### Phase 4: Core Pricing Services
-- [x] `PricingService.java` - Main orchestrator (single entry point)
+- [x] `com.driveme.backend.service.pricing.PricingService.java` - Main orchestrator (single entry point)
 - [x] `RoutingService.java` - Distance/duration calculation
   - [x] Google Maps integration (optional)
   - [x] Haversine formula fallback
@@ -42,7 +42,7 @@
 
 ### Phase 6: Service Integration
 - [x] `TripRequestService.java` updated
-  - [x] Integrated PricingService
+  - [x] Integrated com.driveme.backend.service.pricing.PricingService
   - [x] Official pricing on trip creation
   - [x] Consistency guarantee (preview = official)
 - [x] `TripRequestController.java` updated
@@ -93,7 +93,7 @@ src/main/java/com/driveme/backend/config/
 ### Pricing Services (5 files)
 ```
 src/main/java/com/driveme/backend/service/pricing/
-├── PricingService.java             ✅ (Main orchestrator)
+├── com.driveme.backend.service.pricing.PricingService.java             ✅ (Main orchestrator)
 ├── RoutingService.java             ✅ (Google Maps + Haversine)
 ├── DemandSupplyService.java        ✅ (Surge multiplier)
 ├── TimePricingService.java         ✅ (Rush hour, night)
@@ -109,7 +109,7 @@ src/main/java/com/driveme/backend/controller/
 ### Modified Files (4 files)
 ```
 src/main/java/com/driveme/backend/service/
-├── TripRequestService.java         ✅ (Updated to use PricingService)
+├── TripRequestService.java         ✅ (Updated to use com.driveme.backend.service.pricing.PricingService)
 
 src/main/java/com/driveme/backend/controller/
 ├── TripRequestController.java      ✅ (Removed duplicates)
@@ -179,7 +179,7 @@ root/
 - [x] `WeatherPricingService.calculateWeatherMultiplier()` - TODO for API
 - [x] Configuration parameters all externalized
 - [x] Service layer decoupled from controllers
-- [x] Easy to add loyalty discounts in PricingService
+- [x] Easy to add loyalty discounts in com.driveme.backend.service.pricing.PricingService
 - [x] Easy to add ML pricing wrapper
 
 ---
@@ -345,7 +345,7 @@ curl -X POST http://localhost:8080/api/trip-requests/calculate-price \
 ## 📞 Support
 
 ### Key Contact Points
-1. **PricingService**: Central orchestrator - all pricing logic flows here
+1. **com.driveme.backend.service.pricing.PricingService**: Central orchestrator - all pricing logic flows here
 2. **TripPricingController**: REST endpoint for price preview
 3. **TripRequestService**: Persists official pricing on trip creation
 4. **RoutingService**: Distance/duration calculation
@@ -353,7 +353,7 @@ curl -X POST http://localhost:8080/api/trip-requests/calculate-price \
 
 ### Common Customizations
 - Adjust pricing parameters in application.yaml
-- Add new multipliers (loyalty, weather, etc.) in PricingService
+- Add new multipliers (loyalty, weather, etc.) in com.driveme.backend.service.pricing.PricingService
 - Implement real demand/supply in DemandSupplyService
 - Integrate weather API in WeatherPricingService
 

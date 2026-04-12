@@ -36,7 +36,7 @@ A comprehensive, production-ready pricing system has been successfully implement
 
 ### Modified Files (4 Files)
 ```
-✅ TripRequestService.java (PricingService integration)
+✅ TripRequestService.java (com.driveme.backend.service.pricing.PricingService integration)
 ✅ TripRequestController.java (removed duplicates)
 ✅ application.yaml (pricing configuration)
 ✅ pom.xml (dependencies added)
@@ -74,7 +74,7 @@ A comprehensive, production-ready pricing system has been successfully implement
    - Price persisted with trip
 
 ### Core Services
-1. **PricingService** - Main orchestrator (single source of truth)
+1. **com.driveme.backend.service.pricing.PricingService** - Main orchestrator (single source of truth)
 2. **RoutingService** - Distance/duration calculation (Google Maps + fallback)
 3. **DemandSupplyService** - Surge pricing (ready for real data)
 4. **TimePricingService** - Time-based multipliers (rush hour, night)
@@ -222,7 +222,7 @@ Performance monitoring ready
 - Impact: Weather-based pricing
 
 ### Phase 4: Loyalty & Promotions
-- Location: `PricingService.calculatePrice()`
+- Location: `com.driveme.backend.service.pricing.PricingService.calculatePrice()`
 - Template: Loyalty tier discounts, promo codes
 - Impact: Customer retention
 
@@ -345,7 +345,7 @@ backend/src/main/java/com/driveme/backend/
 ├── config/
 │   └── PricingConfig.java
 ├── service/pricing/
-│   ├── PricingService.java
+│   ├── com.driveme.backend.service.pricing.PricingService.java
 │   ├── RoutingService.java
 │   ├── DemandSupplyService.java
 │   ├── TimePricingService.java

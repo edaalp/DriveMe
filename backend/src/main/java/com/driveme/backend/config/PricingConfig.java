@@ -1,52 +1,41 @@
 package com.driveme.backend.config;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-/**
- * Configuration properties for pricing calculation.
- * Can be loaded from application.yaml or environment variables.
- */
-@Component
+
 @ConfigurationProperties(prefix = "pricing")
+@Component
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class PricingConfig {
-    @Builder.Default
-    private double baseFare = 20.0;
-    @Builder.Default
-    private double perKmRate = 8.0;
-    @Builder.Default
-    private double perMinuteRate = 1.0;
-    @Builder.Default
-    private double maxSurgeMultiplier = 3.0;
-    @Builder.Default
-    private String currency = "TRY";
-    @Builder.Default
+
+    // Ankara Taxi Official Tariff (2026)
+    private double taxiOpeningFee = 55.0;        // TRY midpoint of 45–65 range
+    private double taxiPerKmRate = 36.0;          // TRY/km midpoint of 32–40 range
+    private double taxiPerMinuteRate = 7.0;       // TRY/min waiting rate
+    private double taxiMinFare = 175.0;           // TRY midpoint of indi-bindi 150–200 range
+
+    // Service fee: percentage of total taxi cost (both legs)
+    private double servicePercentage = 0.15;      // 15% — override as needed
+
+    // Price range band
     private double minPricePercentage = 0.9;
-    @Builder.Default
     private double maxPricePercentage = 1.1;
-    private String googleMapsApiKey;
-    @Builder.Default
-    private boolean useGoogleMaps = false;
-    @Builder.Default
+
+    private String currency = "TRY";
+    private double maxSurgeMultiplier = 3.0;
+
+    // Time multipliers
     private int rushHourStartMorning = 7;
-    @Builder.Default
     private int rushHourEndMorning = 10;
-    @Builder.Default
     private int rushHourStartEvening = 17;
-    @Builder.Default
     private int rushHourEndEvening = 20;
-    @Builder.Default
     private double rushHourMultiplier = 1.2;
-    @Builder.Default
-    private double nightTimeMultiplier = 1.1;
-    @Builder.Default
     private int nightTimeStart = 22;
-    @Builder.Default
     private int nightTimeEnd = 6;
+    private double nightTimeMultiplier = 1.1;
+
+    // Google Maps
+    private boolean useGoogleMaps = false;
+    private String googleMapsApiKey = "";
 }

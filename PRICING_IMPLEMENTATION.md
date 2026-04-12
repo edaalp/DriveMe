@@ -7,11 +7,11 @@ A complete, secure, backend-driven pricing system has been implemented for the D
 ## Architecture
 
 ### Core Design Principle
-**Single Source of Truth**: All pricing calculations flow through the centralized `PricingService`, ensuring consistency between the price preview endpoint and the official price persisted on trip creation.
+**Single Source of Truth**: All pricing calculations flow through the centralized `com.driveme.backend.service.pricing.PricingService`, ensuring consistency between the price preview endpoint and the official price persisted on trip creation.
 
 ### Key Components
 
-#### 1. **PricingService** (`service/pricing/PricingService.java`)
+#### 1. **com.driveme.backend.service.pricing.PricingService** (`service/pricing/com.driveme.backend.service.pricing.PricingService.java`)
 The central pricing engine that orchestrates all pricing calculations:
 - Calls `RoutingService` to get distance and duration
 - Applies surge multiplier via `DemandSupplyService`
@@ -223,8 +223,8 @@ export PRICING_USE_GOOGLE_MAPS=true
    - Now delegates to TripPricingController
 
 2. **TripRequestService** (`service/TripRequestService.java`)
-   - Added PricingService dependency
-   - Updated createTripRequest() to use PricingService
+   - Added com.driveme.backend.service.pricing.PricingService dependency
+   - Updated createTripRequest() to use com.driveme.backend.service.pricing.PricingService
    - Prices now calculated at time of trip creation
 
 3. **application.yaml**
@@ -256,7 +256,7 @@ export PRICING_USE_GOOGLE_MAPS=true
    - `config/PricingConfig.java` - Pricing parameters configuration
 
 3. **Pricing Services**
-   - `service/pricing/PricingService.java` - Main pricing engine
+   - `service/pricing/com.driveme.backend.service.pricing.PricingService.java` - Main pricing engine
    - `service/pricing/RoutingService.java` - Distance/duration calculation
    - `service/pricing/DemandSupplyService.java` - Surge pricing
    - `service/pricing/TimePricingService.java` - Time-based multipliers
@@ -275,7 +275,7 @@ POST /api/trip-requests/calculate-price
     ↓
 TripPricingController.calculatePrice()
     ↓
-PricingService.calculatePrice()
+com.driveme.backend.service.pricing.PricingService.calculatePrice()
     ├→ RoutingService.calculateRoute() [Google Maps or Haversine]
     ├→ DemandSupplyService.calculateSurgeMultiplier()
     ├→ TimePricingService.calculateTimeMultiplier()
@@ -296,7 +296,7 @@ TripRequestController.createTripRequest()
     ↓
 TripRequestService.createTripRequest()
     ↓
-PricingService.calculatePrice() [Same logic as preview!]
+com.driveme.backend.service.pricing.PricingService.calculatePrice() [Same logic as preview!]
     ├→ RoutingService.calculateRoute()
     ├→ DemandSupplyService.calculateSurgeMultiplier()
     ├→ TimePricingService.calculateTimeMultiplier()
@@ -364,7 +364,7 @@ curl -X POST http://10.0.2.2:8080/api/trip-requests \
 ## Troubleshooting
 
 ### Issue: Prices not calculated
-**Solution**: Check that PricingService is properly autowired in TripRequestService
+**Solution**: Check that com.driveme.backend.service.pricing.PricingService is properly autowired in TripRequestService
 
 ### Issue: Google Maps API errors
 **Solution**: 
