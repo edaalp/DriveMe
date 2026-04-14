@@ -198,7 +198,9 @@ $RECYCLE.BIN/
 secrets.yml
 secrets.yaml
 application-local.yml
+application-local.yaml
 application-secrets.yml
+application-secrets.yaml
 
 # Google Services
 mobile/android/app/google-services.json

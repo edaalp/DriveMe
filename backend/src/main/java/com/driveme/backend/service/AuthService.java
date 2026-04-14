@@ -74,6 +74,7 @@ public class AuthService {
                     .userId(driver.getId().toString())
                     .email(driver.getEmail())
                     .fullName(driver.getFullName())
+                    .phoneNumber(driver.getPhoneNumber())
                     .userName(driver.getUserName())
                     .verificationStatus(driver.getVerificationStatus().name())
                     .build();
@@ -111,6 +112,7 @@ public class AuthService {
                     .userId(passenger.getId().toString())
                     .email(passenger.getEmail())
                     .fullName(passenger.getFullName())
+                    .phoneNumber(passenger.getPhoneNumber())
                     .userName(passenger.getUserName())
                     .build();
         }
