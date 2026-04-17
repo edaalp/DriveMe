@@ -143,7 +143,7 @@ public class EmailService {
                                            font-size:36px;
                                            font-weight:700;
                                            letter-spacing:12px;
-                                           color:#06B6D4;">%s</p>
+                                           color:#000000;">%s</p>
                               </div>
                             </td>
                           </tr>
