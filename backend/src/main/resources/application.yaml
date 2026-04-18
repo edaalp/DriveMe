@@ -52,9 +52,10 @@ admin:
 
 app:
   upload:
-    dir: ${APP_UPLOAD_DIR:uploads}
-  # Public origin for absolute document URLs in API responses (no trailing slash).
-  public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
+    # Writable folder for signup uploads; served at /uploads/** (see WebMvcUploadConfig).
+    dir: ${APP_UPLOAD_DIR:src/main/resources/static/uploads}
+  # Public origin for absolute document URLs in JSON (no trailing slash). Default targets Android emulator loopback; admin/browser on same machine: APP_PUBLIC_BASE_URL=http://localhost:8080
+  public-base-url: ${APP_PUBLIC_BASE_URL:http://10.0.2.2:8080}
   mail:
     # Set to true to send real OTP emails via SMTP.
     # When false the OTP is only logged and returned in the API response (dev mode).
