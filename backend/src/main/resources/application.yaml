@@ -30,6 +30,23 @@ spring:
     user: ${SPRING_FLYWAY_USER:${SPRING_DATASOURCE_USERNAME:driveme}}
     password: ${SPRING_FLYWAY_PASSWORD:${SPRING_DATASOURCE_PASSWORD:driveme123}}
 
+  # ── SMTP (email) ─────────────────────────────────────────────────────────
+  # Set MAIL_ENABLED=true and supply credentials to send real emails.
+  # For Gmail: create an App Password at https://myaccount.google.com/apppasswords
+  #            (requires 2-Step Verification to be ON on the sender account).
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
 admin:
   signup-secret: ${ADMIN_SIGNUP_SECRET:driveme-admin-secret-2026}
 
@@ -38,6 +55,12 @@ app:
     dir: ${APP_UPLOAD_DIR:uploads}
   # Public origin for absolute document URLs in API responses (no trailing slash).
   public-base-url: ${APP_PUBLIC_BASE_URL:http://localhost:8080}
+  mail:
+    # Set to true to send real OTP emails via SMTP.
+    # When false the OTP is only logged and returned in the API response (dev mode).
+    enabled: ${MAIL_ENABLED:false}
+    # "From" address shown to recipients.
+    from: ${MAIL_FROM:noreply@driveme.com}
 
 logging:
   level:

@@ -23,7 +23,9 @@ public class LoginResponse {
     private String email;
     
     private String fullName;
-    
+
+    private String phoneNumber;
+
     private String userName;
 
     /** Present for DRIVER logins: PENDING, VERIFIED, or REJECTED. */

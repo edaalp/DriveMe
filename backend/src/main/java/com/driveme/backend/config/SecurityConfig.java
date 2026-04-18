@@ -49,6 +49,9 @@ public class SecurityConfig {
                 .requestMatchers(
                     // Auth endpoints
                     "/api/auth/login",
+                    "/api/auth/forgot-password",
+                    "/api/auth/verify-reset-code",
+                    "/api/auth/reset-password",
                     "/api/passengers/signup",
                     "/api/drivers/signup",
                     "/uploads/**",
