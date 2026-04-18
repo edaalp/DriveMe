@@ -71,6 +71,11 @@ public class TripRequestService {
         tripRequest.setMinPrice(Money.ofTRY(priceRange.getMinPrice()));
         tripRequest.setMaxPrice(Money.ofTRY(priceRange.getMaxPrice()));
 
+        // Set offer amount if provided
+        if (request.getOfferAmount() != null) {
+            tripRequest.setOfferAmount(Money.ofTRY(request.getOfferAmount()));
+        }
+
         TripRequest savedRequest = tripRequestRepository.save(tripRequest);
         return TripRequestMapper.toDTO(savedRequest);
     }

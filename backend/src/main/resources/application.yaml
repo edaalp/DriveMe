@@ -29,6 +29,8 @@ spring:
     url: ${SPRING_FLYWAY_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://127.0.0.1:5433/driveme}}
     user: ${SPRING_FLYWAY_USER:${SPRING_DATASOURCE_USERNAME:driveme}}
     password: ${SPRING_FLYWAY_PASSWORD:${SPRING_DATASOURCE_PASSWORD:driveme123}}
+    validate-on-migrate: false
+    repair-on-migrate: true
 
   # ── SMTP (email) ─────────────────────────────────────────────────────────
   # Set MAIL_ENABLED=true and supply credentials to send real emails.
