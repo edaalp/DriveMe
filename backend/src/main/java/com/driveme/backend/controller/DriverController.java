@@ -27,6 +27,9 @@ import java.util.UUID;
 @Slf4j
 public class DriverController {
 
+    /** Multipart part name for selfie; must match Flutter {@code kDriverSignupSelfiePartName}. */
+    public static final String SIGNUP_PART_SELFIE_FILE = "selfieFile";
+
     private final DriverService driverService;
     private final DriverMapper driverMapper;
 
@@ -36,16 +39,18 @@ public class DriverController {
      * @param request driver fields as JSON
      * @param licenseFile license document
      * @param criminalRecordFile criminal record document
+     * @param selfieFile profile photo (selfie), stored and exposed under {@code /uploads/}
      * @return the created driver
      */
     @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> signUp(
             @Valid @RequestPart("driver") DriverSignUpRequest request,
             @RequestPart("licenseFile") MultipartFile licenseFile,
-            @RequestPart("criminalRecordFile") MultipartFile criminalRecordFile) {
+            @RequestPart("criminalRecordFile") MultipartFile criminalRecordFile,
+            @RequestPart(SIGNUP_PART_SELFIE_FILE) MultipartFile selfieFile) {
         try {
             log.info("Received multipart sign-up request for email: {}", request.getEmail());
-            Driver driver = driverService.signUp(request, licenseFile, criminalRecordFile);
+            Driver driver = driverService.signUp(request, licenseFile, criminalRecordFile, selfieFile);
 
             DriverResponse response = driverMapper.toResponse(driver);
 

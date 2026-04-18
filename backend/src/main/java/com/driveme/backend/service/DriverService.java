@@ -55,7 +55,8 @@ public class DriverService {
     public Driver signUp(
             @Valid DriverSignUpRequest request,
             MultipartFile licenseFile,
-            MultipartFile criminalRecordFile) {
+            MultipartFile criminalRecordFile,
+            MultipartFile selfieFile) {
         log.info("Attempting to sign up driver with email: {}", request.getEmail());
 
         if (licenseFile == null || licenseFile.isEmpty()) {
@@ -63,6 +64,9 @@ public class DriverService {
         }
         if (criminalRecordFile == null || criminalRecordFile.isEmpty()) {
             throw new IllegalArgumentException("Criminal record file is required");
+        }
+        if (selfieFile == null || selfieFile.isEmpty()) {
+            throw new IllegalArgumentException("Selfie photo is required");
         }
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
@@ -83,9 +87,10 @@ public class DriverService {
 
         String licenseUrl = storeDriverDocument(licenseFile);
         String criminalUrl = storeDriverDocument(criminalRecordFile);
+        String profilePicturePath = storeProfilePicture(selfieFile);
 
         String hashedPassword = passwordEncoder.encode(request.getPassword());
-        Driver driver = driverMapper.toEntity(request, hashedPassword, licenseUrl, criminalUrl);
+        Driver driver = driverMapper.toEntity(request, hashedPassword, licenseUrl, criminalUrl, profilePicturePath);
 
         Driver savedDriver = driverRepository.save(driver);
         log.info("Driver successfully signed up with ID: {}", savedDriver.getId());
@@ -118,6 +123,74 @@ public class DriverService {
         }
 
         return "/uploads/drivers/" + storedName;
+    }
+
+    /**
+     * Stores the profile (selfie) image under the configured upload root (e.g. {@code static/uploads/})
+     * so it is served at {@code /uploads/&lt;filename&gt;}.
+     */
+    private String storeProfilePicture(MultipartFile file) {
+        String original = file.getOriginalFilename();
+        if (original == null || original.isBlank()) {
+            original = inferSelfieFilenameFromContentType(file.getContentType());
+        }
+        String safeName = Paths.get(original).getFileName().toString();
+        if (safeName.contains("..")) {
+            throw new IllegalArgumentException("Invalid filename");
+        }
+
+        String lower = safeName.toLowerCase(Locale.ROOT);
+        if (!hasAllowedProfileExtension(lower)) {
+            String inferred = inferSelfieFilenameFromContentType(file.getContentType());
+            safeName = Paths.get(inferred).getFileName().toString();
+            lower = safeName.toLowerCase(Locale.ROOT);
+        }
+        if (!hasAllowedProfileExtension(lower)) {
+            throw new IllegalArgumentException("Profile picture must be JPG, JPEG, or PNG");
+        }
+
+        String storedName = buildSanitizedStoredFilename(safeName);
+
+        Path dir = Paths.get(uploadDir).toAbsolutePath().normalize();
+        try {
+            Files.createDirectories(dir);
+            Path target = dir.resolve(storedName);
+            try (InputStream in = file.getInputStream()) {
+                Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException e) {
+            log.error("Failed to store profile picture", e);
+            throw new IllegalArgumentException("Could not store profile picture");
+        }
+
+        return "/uploads/" + storedName;
+    }
+
+    private static boolean hasAllowedProfileExtension(String lowerFilename) {
+        return lowerFilename.endsWith(".jpg")
+                || lowerFilename.endsWith(".jpeg")
+                || lowerFilename.endsWith(".png");
+    }
+
+    /**
+     * Fallback when {@code filename} is missing or has no extension; maps Content-Type to a dummy name
+     * so {@link #buildSanitizedStoredFilename} can derive the stored extension (jpg / jpeg / png).
+     */
+    private static String inferSelfieFilenameFromContentType(String contentType) {
+        if (contentType == null || contentType.isBlank()) {
+            return "selfie.jpg";
+        }
+        String ct = contentType.toLowerCase(Locale.ROOT);
+        if (ct.contains("png")) {
+            return "selfie.png";
+        }
+        if (ct.contains("jpeg")) {
+            return "selfie.jpeg";
+        }
+        if (ct.contains("jpg")) {
+            return "selfie.jpg";
+        }
+        return "selfie.jpg";
     }
 
     /**

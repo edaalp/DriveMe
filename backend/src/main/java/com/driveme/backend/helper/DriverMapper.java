@@ -13,7 +13,7 @@ import java.util.Optional;
 @Component
 public class DriverMapper {
 
-    @Value("${app.public-base-url:http://localhost:8080}")
+    @Value("${app.public-base-url:http://10.0.2.2:8080}")
     private String publicBaseUrl;
 
     /**
@@ -23,13 +23,15 @@ public class DriverMapper {
      * @param hashedPassword the hashed password
      * @param driverLicenseDocumentUrl stored public path for license file
      * @param criminalRecordDocumentUrl stored public path for criminal record file
+     * @param profilePicturePath stored public path for profile (selfie) image
      * @return the driver entity
      */
     public Driver toEntity(
             com.driveme.backend.dto.DriverSignUpRequest request,
             String hashedPassword,
             String driverLicenseDocumentUrl,
-            String criminalRecordDocumentUrl) {
+            String criminalRecordDocumentUrl,
+            String profilePicturePath) {
         Driver driver = new Driver();
 
         driver.setEmail(request.getEmail());
@@ -52,6 +54,7 @@ public class DriverMapper {
         driver.setCriminalRecordFileName(request.getCriminalRecordFileName());
         driver.setDriverLicenseDocumentUrl(driverLicenseDocumentUrl);
         driver.setCriminalRecordDocumentUrl(criminalRecordDocumentUrl);
+        driver.setProfilePictureUrl(profilePicturePath);
 
         return driver;
     }
@@ -82,9 +85,11 @@ public class DriverMapper {
         response.setLicenseIssueDate(driver.getLicenseIssueDate());
         response.setCriminalRecordFileName(driver.getCriminalRecordFileName());
         response.setDriverLicenseDocumentUrl(
-                toPublicUrl(driver.getDriverLicenseDocumentUrl()));
+                toPublicUrl(normalizeStoredPath(driver.getDriverLicenseDocumentUrl(), "drivers")));
         response.setCriminalRecordDocumentUrl(
-                toPublicUrl(driver.getCriminalRecordDocumentUrl()));
+                toPublicUrl(normalizeStoredPath(driver.getCriminalRecordDocumentUrl(), "drivers")));
+        response.setProfilePictureUrl(
+                toPublicUrl(normalizeStoredPath(driver.getProfilePictureUrl(), null)));
         response.setVerificationStatus(driver.getVerificationStatus());
         response.setRejectionReason(driver.getRejectionReason());
 
@@ -92,7 +97,37 @@ public class DriverMapper {
     }
 
     /**
-     * Turns stored paths like {@code /uploads/drivers/x.pdf} into browser-openable absolute URLs.
+     * Legacy rows may store only a filename; new rows use {@code /uploads/drivers/...} or {@code /uploads/...}.
+     *
+     * @param subfolderUnderUploads e.g. {@code "drivers"} for license/criminal; {@code null} for profile files at upload root
+     */
+    private String normalizeStoredPath(String raw, String subfolderUnderUploads) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        String t = raw.trim();
+        if (t.startsWith("http://") || t.startsWith("https://")) {
+            return t;
+        }
+        if (t.startsWith("/uploads/")) {
+            return t;
+        }
+        if (t.startsWith("uploads/")) {
+            return "/" + t;
+        }
+        if (!t.contains("/")) {
+            if (subfolderUnderUploads != null && !subfolderUnderUploads.isBlank()) {
+                String s = subfolderUnderUploads.replaceAll("^/+|/+$", "");
+                return "/uploads/" + s + "/" + t;
+            }
+            return "/uploads/" + t;
+        }
+        return t.startsWith("/") ? t : "/" + t;
+    }
+
+    /**
+     * Turns stored paths like {@code /uploads/drivers/x.pdf} into browser-openable absolute URLs
+     * using {@code app.public-base-url}.
      */
     private String toPublicUrl(String pathOrUrl) {
         if (pathOrUrl == null || pathOrUrl.isBlank()) {

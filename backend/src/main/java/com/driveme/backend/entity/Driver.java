@@ -54,6 +54,10 @@ public class Driver extends BaseUser {
     @Column(length = 512)
     private String criminalRecordDocumentUrl;
 
+    /** Absolute or path-style URL for the driver's profile (selfie) image, exposed under {@code /uploads/...}. */
+    @Column(length = 512)
+    private String profilePictureUrl;
+
     @Enumerated(EnumType.STRING)
     private VerificationStatus verificationStatus = VerificationStatus.PENDING;
 

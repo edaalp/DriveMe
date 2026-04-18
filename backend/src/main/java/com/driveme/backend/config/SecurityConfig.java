@@ -41,6 +41,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(Customizer.withDefaults())
+            // Allow embedding /uploads/* in admin (localhost:5173) iframes; same-origin blocks 5173→8080.
+            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

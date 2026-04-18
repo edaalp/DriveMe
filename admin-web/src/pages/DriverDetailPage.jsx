@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import api, { hasDocumentUrl, openDocumentUrl } from "../api";
+import api, { hasDocumentUrl, openDocumentUrl, resolveAssetUrl } from "../api";
+
+function isPdfPath(url) {
+  if (typeof url !== "string" || !url.trim()) return false;
+  const path = url.trim().split("?")[0].toLowerCase();
+  return path.endsWith(".pdf");
+}
 
 export default function DriverDetailPage() {
   const { id } = useParams();
@@ -77,8 +83,13 @@ export default function DriverDetailPage() {
 
   const licenseUrl = driver.driverLicenseDocumentUrl;
   const criminalUrl = driver.criminalRecordDocumentUrl;
+  const profileUrl = driver.profilePictureUrl;
+
+  const licensePreviewSrc = hasDocumentUrl(licenseUrl)
+    ? resolveAssetUrl(licenseUrl)
+    : "";
   const criminalPreviewSrc = hasDocumentUrl(criminalUrl)
-    ? criminalUrl.trim()
+    ? resolveAssetUrl(criminalUrl)
     : criminalBlobUrl;
 
   return (
@@ -95,6 +106,23 @@ export default function DriverDetailPage() {
           {driver.verificationStatus}
         </span>
       </div>
+
+      {hasDocumentUrl(profileUrl) && (
+        <div className="card" style={{ marginTop: "1rem" }}>
+          <h3 style={{ marginBottom: "0.75rem" }}>Profile (selfie)</h3>
+          <div className="document-preview" style={{ maxWidth: "320px" }}>
+            <img
+              src={resolveAssetUrl(profileUrl)}
+              alt="Driver profile"
+              style={{
+                width: "100%",
+                borderRadius: "8px",
+                objectFit: "cover",
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <div className="info-grid">
@@ -149,11 +177,30 @@ export default function DriverDetailPage() {
         )}
       </div>
 
+      {licensePreviewSrc && (
+        <div className="card" style={{ marginTop: "1rem" }}>
+          <h3 style={{ marginBottom: "0.75rem" }}>License document preview</h3>
+          <div className="document-preview">
+            {isPdfPath(licenseUrl) ? (
+              <iframe
+                src={resolveAssetUrl(licensePreviewSrc)}
+                title="License document"
+              />
+            ) : (
+              <img
+                src={resolveAssetUrl(licensePreviewSrc)}
+                alt="License document"
+              />
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="card" style={{ marginTop: "1rem" }}>
         <h3 style={{ marginBottom: "0.75rem" }}>Documents</h3>
         <p style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
-          Open files in a new browser tab. URLs are served from the API
-          <code style={{ marginLeft: "0.35rem" }}>/uploads/</code> path.
+          Open files in a new browser tab. URLs use the backend{" "}
+          <code>/uploads/</code> base ({resolveAssetUrl("/uploads/")}…).
         </p>
         <div className="actions-bar" style={{ flexWrap: "wrap", gap: "0.5rem" }}>
           <button
@@ -182,10 +229,17 @@ export default function DriverDetailPage() {
             {driver.criminalRecordFileName}
           </p>
           <div className="document-preview">
-            {driver.criminalRecordFileName?.toLowerCase().endsWith(".pdf") ? (
-              <iframe src={criminalPreviewSrc} title="Criminal record" />
+            {isPdfPath(criminalUrl) ||
+            driver.criminalRecordFileName?.toLowerCase().endsWith(".pdf") ? (
+              <iframe
+                src={resolveAssetUrl(criminalPreviewSrc)}
+                title="Criminal record"
+              />
             ) : (
-              <img src={criminalPreviewSrc} alt="Criminal record" />
+              <img
+                src={resolveAssetUrl(criminalPreviewSrc)}
+                alt="Criminal record"
+              />
             )}
           </div>
         </div>
