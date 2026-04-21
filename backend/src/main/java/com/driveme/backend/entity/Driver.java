@@ -46,15 +46,22 @@ public class Driver extends BaseUser {
 
     private String criminalRecordFileName;
 
-    /** Public URL path under {@code /uploads/drivers/...} for the uploaded license scan. */
+    @Lob
+    private byte[] driverLicenseFile;
+
+    private String driverLicenseFileName;
+
+    @Lob
+    private byte[] profilePictureFile;
+
+    private String profilePictureFileName;
+
     @Column(length = 512)
     private String driverLicenseDocumentUrl;
 
-    /** Public URL path under {@code /uploads/drivers/...} for the criminal record document. */
     @Column(length = 512)
     private String criminalRecordDocumentUrl;
 
-    /** Absolute or path-style URL for the driver's profile (selfie) image, exposed under {@code /uploads/...}. */
     @Column(length = 512)
     private String profilePictureUrl;
 

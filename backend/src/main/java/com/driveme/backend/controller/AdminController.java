@@ -184,6 +184,42 @@ public class AdminController {
                 .body(driver.getCriminalRecordFile());
     }
 
+    @GetMapping("/drivers/{id}/document/license")
+    @Operation(summary = "Download driver license", description = "Download a driver's license document from DB")
+    public ResponseEntity<byte[]> downloadDriverLicense(@PathVariable UUID id) {
+        Driver driver = driverService.getDriverEntityById(id);
+
+        if (driver.getDriverLicenseFile() == null || driver.getDriverLicenseFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(driver.getDriverLicenseFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + driver.getDriverLicenseFileName() + "\"")
+                .body(driver.getDriverLicenseFile());
+    }
+
+    @GetMapping("/drivers/{id}/document/profile-picture")
+    @Operation(summary = "Download profile picture", description = "Download a driver's profile picture from DB")
+    public ResponseEntity<byte[]> downloadProfilePicture(@PathVariable UUID id) {
+        Driver driver = driverService.getDriverEntityById(id);
+
+        if (driver.getProfilePictureFile() == null || driver.getProfilePictureFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(driver.getProfilePictureFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + driver.getProfilePictureFileName() + "\"")
+                .body(driver.getProfilePictureFile());
+    }
+
     // ==================== Dashboard Stats ====================
 
     @GetMapping("/stats")
