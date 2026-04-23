@@ -2,6 +2,7 @@ package com.driveme.backend.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -27,6 +28,22 @@ public class Passenger extends BaseUser {
     /** URL of the selfie used as the profile picture, stored under /uploads/. */
     @Column(length = 512)
     private String profilePictureUrl;
+
+    // Database-stored file bytes for sharing with coworkers
+    @Lob
+    private byte[] tcPhotoFrontFile;
+
+    private String tcPhotoFrontFileName;
+
+    @Lob
+    private byte[] tcPhotoBackFile;
+
+    private String tcPhotoBackFileName;
+
+    @Lob
+    private byte[] profilePictureFile;
+
+    private String profilePictureFileName;
 
     public Passenger() {
         super();

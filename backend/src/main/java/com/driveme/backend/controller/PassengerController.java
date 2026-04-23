@@ -8,11 +8,14 @@ import com.driveme.backend.auth.PassengerSignUpRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 /**
  * REST controller for passenger operations.
@@ -69,6 +72,78 @@ public class PassengerController {
                 .map(passengerMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Download passenger profile picture (selfie) from database.
+     */
+    @GetMapping("/{id}/document/profile-picture")
+    public ResponseEntity<byte[]> downloadProfilePicture(@PathVariable UUID id) {
+        Passenger passenger = passengerService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Passenger not found"));
+
+        if (passenger.getProfilePictureFile() == null || passenger.getProfilePictureFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(passenger.getProfilePictureFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + passenger.getProfilePictureFileName() + "\"")
+                .body(passenger.getProfilePictureFile());
+    }
+
+    /**
+     * Download passenger TC identity card front photo from database.
+     */
+    @GetMapping("/{id}/document/tc-front")
+    public ResponseEntity<byte[]> downloadTcPhotoFront(@PathVariable UUID id) {
+        Passenger passenger = passengerService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Passenger not found"));
+
+        if (passenger.getTcPhotoFrontFile() == null || passenger.getTcPhotoFrontFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(passenger.getTcPhotoFrontFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + passenger.getTcPhotoFrontFileName() + "\"")
+                .body(passenger.getTcPhotoFrontFile());
+    }
+
+    /**
+     * Download passenger TC identity card back photo from database.
+     */
+    @GetMapping("/{id}/document/tc-back")
+    public ResponseEntity<byte[]> downloadTcPhotoBack(@PathVariable UUID id) {
+        Passenger passenger = passengerService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Passenger not found"));
+
+        if (passenger.getTcPhotoBackFile() == null || passenger.getTcPhotoBackFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(passenger.getTcPhotoBackFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + passenger.getTcPhotoBackFileName() + "\"")
+                .body(passenger.getTcPhotoBackFile());
+    }
+
+    private String guessContentType(String fileName) {
+        if (fileName == null) return MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        String lower = fileName.toLowerCase();
+        if (lower.endsWith(".pdf")) return MediaType.APPLICATION_PDF_VALUE;
+        if (lower.endsWith(".png")) return MediaType.IMAGE_PNG_VALUE;
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return MediaType.IMAGE_JPEG_VALUE;
+        return MediaType.APPLICATION_OCTET_STREAM_VALUE;
     }
 
     private record ErrorResponse(String message) {}

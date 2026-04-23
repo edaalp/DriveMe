@@ -71,26 +71,58 @@ public class PassengerService {
 
         String hashedPassword = passwordEncoder.encode(request.getPassword());
 
-        String profilePictureUrl = null;
+        // Store profile picture (selfie) bytes in database
+        byte[] profilePictureByte = null;
+        String profilePictureFileName = null;
         if (selfieFile != null && !selfieFile.isEmpty()) {
-            profilePictureUrl = storeFile(selfieFile, true);
-            log.info("Stored passenger selfie at: {}", profilePictureUrl);
+            try {
+                profilePictureByte = selfieFile.getBytes();
+                profilePictureFileName = selfieFile.getOriginalFilename();
+                log.info("Stored passenger selfie in database: {}", profilePictureFileName);
+            } catch (IOException e) {
+                log.error("Failed to store profile picture", e);
+                throw new IllegalArgumentException("Could not store profile picture");
+            }
         }
 
-        String tcPhotoFrontUrl = null;
+        // Store TC front photo bytes in database
+        byte[] tcPhotoFrontByte = null;
+        String tcPhotoFrontFileName = null;
         if (tcPhotoFrontFile != null && !tcPhotoFrontFile.isEmpty()) {
-            tcPhotoFrontUrl = storeFile(tcPhotoFrontFile, true);
-            log.info("Stored TC front photo at: {}", tcPhotoFrontUrl);
+            try {
+                tcPhotoFrontByte = tcPhotoFrontFile.getBytes();
+                tcPhotoFrontFileName = tcPhotoFrontFile.getOriginalFilename();
+                log.info("Stored TC front photo in database: {}", tcPhotoFrontFileName);
+            } catch (IOException e) {
+                log.error("Failed to store TC front photo", e);
+                throw new IllegalArgumentException("Could not store TC front photo");
+            }
         }
 
-        String tcPhotoBackUrl = null;
+        // Store TC back photo bytes in database
+        byte[] tcPhotoBackByte = null;
+        String tcPhotoBackFileName = null;
         if (tcPhotoBackFile != null && !tcPhotoBackFile.isEmpty()) {
-            tcPhotoBackUrl = storeFile(tcPhotoBackFile, true);
-            log.info("Stored TC back photo at: {}", tcPhotoBackUrl);
+            try {
+                tcPhotoBackByte = tcPhotoBackFile.getBytes();
+                tcPhotoBackFileName = tcPhotoBackFile.getOriginalFilename();
+                log.info("Stored TC back photo in database: {}", tcPhotoBackFileName);
+            } catch (IOException e) {
+                log.error("Failed to store TC back photo", e);
+                throw new IllegalArgumentException("Could not store TC back photo");
+            }
         }
 
-        Passenger passenger = passengerMapper.toEntity(
-                request, hashedPassword, profilePictureUrl, tcPhotoFrontUrl, tcPhotoBackUrl);
+        Passenger passenger = passengerMapper.toEntity(request, hashedPassword, null, null, null);
+
+        // Set file bytes
+        passenger.setProfilePictureFile(profilePictureByte);
+        passenger.setProfilePictureFileName(profilePictureFileName);
+        passenger.setTcPhotoFrontFile(tcPhotoFrontByte);
+        passenger.setTcPhotoFrontFileName(tcPhotoFrontFileName);
+        passenger.setTcPhotoBackFile(tcPhotoBackByte);
+        passenger.setTcPhotoBackFileName(tcPhotoBackFileName);
+
         Passenger saved = passengerRepository.save(passenger);
         log.info("Passenger successfully signed up with ID: {}", saved.getId());
         return saved;

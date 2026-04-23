@@ -69,7 +69,11 @@ public class SecurityConfig {
                     // Actuator endpoints
                     "/actuator/**",
                     // Error endpoint (so validation/error responses aren't blocked)
-                    "/error"
+                    "/error",
+                    // Document download endpoints (accessed via <img src> / window.open without JWT)
+                    "/api/admin/drivers/*/document/**",
+                    "/api/admin/vehicles/*/document",
+                    "/api/passengers/*/document/**"
                 ).permitAll()
                 // Admin endpoints require ADMIN role
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")

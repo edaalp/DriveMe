@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api, { hasDocumentUrl, openDocumentUrl } from "../api";
+import api, {
+  hasDocumentUrl,
+  openDocumentUrl,
+  getPassengerProfilePictureUrl,
+  getPassengerTcPhotoFrontUrl,
+  getPassengerTcPhotoBackUrl
+} from "../api";
 
 export default function PassengersPage() {
   const [passengers, setPassengers] = useState([]);
@@ -55,8 +61,7 @@ export default function PassengersPage() {
                     <button
                       type="button"
                       className="btn btn-sm btn-outline"
-                      disabled={!hasDocumentUrl(p.profilePictureUrl)}
-                      onClick={() => openDocumentUrl(p.profilePictureUrl)}
+                      onClick={() => openDocumentUrl(getPassengerProfilePictureUrl(p.id))}
                     >
                       View
                     </button>
@@ -65,8 +70,7 @@ export default function PassengersPage() {
                     <button
                       type="button"
                       className="btn btn-sm btn-outline"
-                      disabled={!hasDocumentUrl(p.tcPhotoFrontUrl)}
-                      onClick={() => openDocumentUrl(p.tcPhotoFrontUrl)}
+                      onClick={() => openDocumentUrl(getPassengerTcPhotoFrontUrl(p.id))}
                     >
                       View
                     </button>
@@ -75,8 +79,7 @@ export default function PassengersPage() {
                     <button
                       type="button"
                       className="btn btn-sm btn-outline"
-                      disabled={!hasDocumentUrl(p.tcPhotoBackUrl)}
-                      onClick={() => openDocumentUrl(p.tcPhotoBackUrl)}
+                      onClick={() => openDocumentUrl(getPassengerTcPhotoBackUrl(p.id))}
                     >
                       View
                     </button>

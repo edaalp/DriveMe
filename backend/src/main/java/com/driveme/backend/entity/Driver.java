@@ -1,13 +1,13 @@
 package com.driveme.backend.entity;
 
-import java.util.Date;
-
 import com.driveme.backend.common.VerificationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import java.util.Date;
 
 /**
  * Driver user type.
@@ -45,6 +45,16 @@ public class Driver extends BaseUser {
     private byte[] criminalRecordFile;
 
     private String criminalRecordFileName;
+
+    @Lob
+    private byte[] driverLicenseFile;
+
+    private String driverLicenseFileName;
+
+    @Lob
+    private byte[] profilePictureFile;
+
+    private String profilePictureFileName;
 
     /** Public URL path under {@code /uploads/drivers/...} for the uploaded license scan. */
     @Column(length = 512)
