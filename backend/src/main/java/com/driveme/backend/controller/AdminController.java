@@ -3,14 +3,17 @@ package com.driveme.backend.controller;
 import com.driveme.backend.common.VerificationStatus;
 import com.driveme.backend.dto.AdminSignUpRequest;
 import com.driveme.backend.dto.DriverResponse;
+import com.driveme.backend.dto.PassengerDTO;
 import com.driveme.backend.dto.VehicleDTO;
 import com.driveme.backend.dto.VerificationDecisionRequest;
 import com.driveme.backend.entity.Admin;
 import com.driveme.backend.entity.Driver;
 import com.driveme.backend.entity.Vehicle;
 import com.driveme.backend.helper.DriverMapper;
+import com.driveme.backend.helper.PassengerMapper;
 import com.driveme.backend.service.AdminService;
 import com.driveme.backend.service.DriverService;
+import com.driveme.backend.service.PassengerService;
 import com.driveme.backend.service.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,6 +45,8 @@ public class AdminController {
     private final VehicleService vehicleService;
     private final DriverService driverService;
     private final DriverMapper driverMapper;
+    private final PassengerService passengerService;
+    private final PassengerMapper passengerMapper;
 
     @Value("${admin.signup-secret}")
     private String signupSecret;
@@ -182,6 +187,27 @@ public class AdminController {
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"" + driver.getCriminalRecordFileName() + "\"")
                 .body(driver.getCriminalRecordFile());
+    }
+
+    // ==================== Passenger Management ====================
+
+    @GetMapping("/passengers")
+    @Operation(summary = "List passengers", description = "List all registered passengers")
+    public ResponseEntity<List<PassengerDTO>> getPassengers() {
+        List<PassengerDTO> passengers = passengerService.findAll()
+                .stream()
+                .map(passengerMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(passengers);
+    }
+
+    @GetMapping("/passengers/{id}")
+    @Operation(summary = "Get passenger detail", description = "Get full passenger details for admin review")
+    public ResponseEntity<?> getPassengerById(@PathVariable UUID id) {
+        return passengerService.findById(id)
+                .map(passengerMapper::toDTO)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // ==================== Dashboard Stats ====================

@@ -19,4 +19,8 @@ public class PassengerDTO {
     private String fullName;
     private String phoneNumber;
     private boolean active;
+    private Long tcNo;
+    private String tcPhotoFrontUrl;
+    private String tcPhotoBackUrl;
+    private String profilePictureUrl;
 }
