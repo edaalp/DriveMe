@@ -9,7 +9,9 @@ spring:
       max-request-size: 15MB
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://ep-aged-star-aldavdxb-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require}
+    # prepareThreshold=0: Neon pooler + server-side prepared statements can trigger
+    # "cached plan must not change result type" during Hibernate schema introspection.
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://ep-aged-star-aldavdxb-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&prepareThreshold=0}
     username: ${SPRING_DATASOURCE_USERNAME:neondb_owner}
     password: ${SPRING_DATASOURCE_PASSWORD:npg_DCGja3Q8Etuy}
     driver-class-name: org.postgresql.Driver
@@ -26,7 +28,7 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
-    url: ${SPRING_FLYWAY_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://ep-aged-star-aldavdxb-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require}}
+    url: ${SPRING_FLYWAY_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://ep-aged-star-aldavdxb-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&prepareThreshold=0}}
     user: ${SPRING_FLYWAY_USER:${SPRING_DATASOURCE_USERNAME:neondb_owner}}
     password: ${SPRING_FLYWAY_PASSWORD:${SPRING_DATASOURCE_PASSWORD:npg_DCGja3Q8Etuy}}
     validate-on-migrate: false

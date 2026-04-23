@@ -3,14 +3,18 @@ package com.driveme.backend.controller;
 import com.driveme.backend.common.VerificationStatus;
 import com.driveme.backend.dto.AdminSignUpRequest;
 import com.driveme.backend.dto.DriverResponse;
+import com.driveme.backend.dto.PassengerAdminResponse;
 import com.driveme.backend.dto.VehicleDTO;
 import com.driveme.backend.dto.VerificationDecisionRequest;
 import com.driveme.backend.entity.Admin;
 import com.driveme.backend.entity.Driver;
+import com.driveme.backend.entity.Passenger;
 import com.driveme.backend.entity.Vehicle;
 import com.driveme.backend.helper.DriverMapper;
+import com.driveme.backend.helper.PassengerMapper;
 import com.driveme.backend.service.AdminService;
 import com.driveme.backend.service.DriverService;
+import com.driveme.backend.service.PassengerService;
 import com.driveme.backend.service.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,7 +45,9 @@ public class AdminController {
     private final AdminService adminService;
     private final VehicleService vehicleService;
     private final DriverService driverService;
+    private final PassengerService passengerService;
     private final DriverMapper driverMapper;
+    private final PassengerMapper passengerMapper;
 
     @Value("${admin.signup-secret}")
     private String signupSecret;
@@ -220,6 +226,81 @@ public class AdminController {
                 .body(driver.getProfilePictureFile());
     }
 
+    // ==================== Passenger verification ====================
+
+    @GetMapping("/passengers")
+    @Operation(summary = "List passengers", description = "List passengers, optionally filtered by verification status")
+    public ResponseEntity<List<PassengerAdminResponse>> getPassengers(
+            @RequestParam(required = false) VerificationStatus status) {
+        List<PassengerAdminResponse> passengers = (status != null)
+                ? passengerService.getPassengersByVerificationStatus(status)
+                : passengerService.getAllPassengersForAdmin();
+        return ResponseEntity.ok(passengers);
+    }
+
+    @GetMapping("/passengers/{id}")
+    @Operation(summary = "Get passenger detail", description = "Get full passenger details for admin review")
+    public ResponseEntity<PassengerAdminResponse> getPassengerById(@PathVariable UUID id) {
+        Passenger passenger = passengerService.getPassengerEntityById(id);
+        return ResponseEntity.ok(passengerMapper.toAdminResponse(passenger));
+    }
+
+    @PutMapping("/passengers/{id}/verify")
+    @Operation(summary = "Verify passenger", description = "Approve or reject a passenger account")
+    public ResponseEntity<?> verifyPassenger(
+            @PathVariable UUID id,
+            @Valid @RequestBody VerificationDecisionRequest request) {
+        try {
+            if (request.getDecision() == VerificationStatus.REJECTED
+                    && (request.getReason() == null || request.getReason().isBlank())) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Reason is required when rejecting"));
+            }
+
+            PassengerAdminResponse updated = passengerService.verifyPassenger(
+                    id, request.getDecision(), request.getReason());
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/passengers/{id}/document/profile-picture")
+    @Operation(summary = "Download passenger profile picture", description = "Profile / selfie bytes from DB")
+    public ResponseEntity<byte[]> downloadPassengerProfilePicture(@PathVariable UUID id) {
+        Passenger passenger = passengerService.getPassengerEntityById(id);
+
+        if (passenger.getProfilePictureFile() == null || passenger.getProfilePictureFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(passenger.getProfilePictureFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + passenger.getProfilePictureFileName() + "\"")
+                .body(passenger.getProfilePictureFile());
+    }
+
+    @GetMapping("/passengers/{id}/document/identity-document")
+    @Operation(summary = "Download passenger identity document", description = "ID card / passport file from DB")
+    public ResponseEntity<byte[]> downloadPassengerIdentityDocument(@PathVariable UUID id) {
+        Passenger passenger = passengerService.getPassengerEntityById(id);
+
+        if (passenger.getIdentityDocumentFile() == null || passenger.getIdentityDocumentFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(passenger.getIdentityDocumentFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + passenger.getIdentityDocumentFileName() + "\"")
+                .body(passenger.getIdentityDocumentFile());
+    }
+
     // ==================== Dashboard Stats ====================
 
     @GetMapping("/stats")
@@ -227,10 +308,12 @@ public class AdminController {
     public ResponseEntity<Map<String, Object>> getStats() {
         long pendingVehicles = vehicleService.getVehiclesByStatus(VerificationStatus.PENDING).size();
         long pendingDrivers = driverService.getDriversByVerificationStatus(VerificationStatus.PENDING).size();
+        long pendingPassengers = passengerService.countPendingPassengers();
 
         return ResponseEntity.ok(Map.of(
                 "pendingVehicles", pendingVehicles,
-                "pendingDrivers", pendingDrivers
+                "pendingDrivers", pendingDrivers,
+                "pendingPassengers", pendingPassengers
         ));
     }
 

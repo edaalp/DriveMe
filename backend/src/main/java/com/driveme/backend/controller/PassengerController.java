@@ -1,16 +1,18 @@
 package com.driveme.backend.controller;
 
+import com.driveme.backend.auth.PassengerSignUpRequest;
+import com.driveme.backend.dto.PassengerDTO;
 import com.driveme.backend.entity.Passenger;
 import com.driveme.backend.helper.PassengerMapper;
-import com.driveme.backend.dto.PassengerDTO;
 import com.driveme.backend.service.PassengerService;
-import com.driveme.backend.auth.PassengerSignUpRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * REST controller for passenger operations.
@@ -21,20 +23,28 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class PassengerController {
 
+    /** Same part name as driver signup selfie (Flutter must match). */
+    public static final String SIGNUP_PART_SELFIE_FILE = "selfieFile";
+    public static final String SIGNUP_PART_IDENTITY_FILE = "identityDocumentFile";
+
     private final PassengerService passengerService;
     private final PassengerMapper passengerMapper;
 
     /**
-     * Sign up a new passenger.
-     * 
-     * @param request the sign-up request containing passenger details
-     * @return the created passenger
+     * Sign up a new passenger: multipart JSON {@code passenger} + selfie + identity document (PDF/image).
      */
-    @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@Valid @RequestBody PassengerSignUpRequest request) {
+    @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> signUp(
+            @Valid @RequestPart("passenger") PassengerSignUpRequest request,
+            @RequestPart(SIGNUP_PART_SELFIE_FILE) MultipartFile selfieFile,
+            @RequestPart(SIGNUP_PART_IDENTITY_FILE) MultipartFile identityDocumentFile) {
         try {
-            log.info("Received sign-up request for email: {}", request.getEmail());
-            Passenger passenger = passengerService.signUp(request);
+            log.info(
+                    "Passenger signup multipart email={} selfieBytes={} identityBytes={}",
+                    request.getEmail(),
+                    selfieFile.getSize(),
+                    identityDocumentFile.getSize());
+            Passenger passenger = passengerService.signUp(request, selfieFile, identityDocumentFile);
             
             // Convert to response DTO using mapper
             PassengerDTO response = passengerMapper.toDTO(passenger);

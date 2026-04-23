@@ -72,6 +72,7 @@ public class SecurityConfig {
                     "/error",
                     // Document download endpoints (accessed via <img src> / window.open without JWT)
                     "/api/admin/drivers/*/document/**",
+                    "/api/admin/passengers/*/document/**",
                     "/api/admin/vehicles/*/document"
                 ).permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
