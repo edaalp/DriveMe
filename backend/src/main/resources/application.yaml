@@ -69,3 +69,8 @@ logging:
   level:
     root: INFO
     com.driveme.backend: INFO
+
+management:
+  health:
+    mail:
+      enabled: false
