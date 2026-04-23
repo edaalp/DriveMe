@@ -1,7 +1,10 @@
 package com.driveme.backend.entity;
 
+import com.driveme.backend.common.VerificationStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Lob;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,6 +19,14 @@ public class Passenger extends BaseUser {
 
     /** Turkish national ID number (TC Kimlik No). */
     private Long tcNo;
+
+    /** Verification status for passenger approval workflow. */
+    @Enumerated(EnumType.STRING)
+    private VerificationStatus verificationStatus = VerificationStatus.PENDING;
+
+    /** Reason for rejection, if applicable. */
+    @Column(length = 1024)
+    private String rejectionReason;
 
     /** URL of the front-side TC identity card photo, stored under /uploads/. */
     @Column(length = 512)

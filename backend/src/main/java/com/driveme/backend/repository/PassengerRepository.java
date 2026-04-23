@@ -1,5 +1,6 @@
 package com.driveme.backend.repository;
 
+import com.driveme.backend.common.VerificationStatus;
 import com.driveme.backend.entity.Passenger;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -28,6 +29,11 @@ public interface PassengerRepository extends JpaRepository<Passenger, UUID> {
      * Find active passengers.
      */
     List<Passenger> findByActiveTrue();
+
+    /**
+     * Find passengers by verification status.
+     */
+    List<Passenger> findByVerificationStatus(VerificationStatus verificationStatus);
 
     /**
      * Check if email exists.

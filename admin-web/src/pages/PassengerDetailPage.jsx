@@ -11,10 +11,33 @@ import api, {
 export default function PassengerDetailPage() {
   const { id } = useParams();
   const [passenger, setPassenger] = useState(null);
+  const [reason, setReason] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const load = () => {
+    api.get(`/admin/passengers/${id}`).then((res) => setPassenger(res.data));
+  };
 
   useEffect(() => {
-    api.get(`/admin/passengers/${id}`).then((res) => setPassenger(res.data));
+    load();
   }, [id]);
+
+  const handleVerify = async (decision) => {
+    if (decision === "REJECTED" && !reason.trim()) {
+      alert("Please provide a reason for rejection.");
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await api.put(`/admin/passengers/${id}/verify`, { decision, reason });
+      load();
+      setReason("");
+    } catch (err) {
+      alert(err.response?.data?.message || "Action failed");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   if (!passenger) return <div className="loading">Loading...</div>;
 
@@ -27,8 +50,8 @@ export default function PassengerDetailPage() {
 
       <div className="detail-header">
         <h1>{passenger.fullName}</h1>
-        <span className={`badge badge-${passenger.active ? "verified" : "rejected"}`}>
-          {passenger.active ? "Active" : "Inactive"}
+        <span className={`badge badge-${passenger.verificationStatus?.toLowerCase()}`}>
+          {passenger.verificationStatus}
         </span>
       </div>
 
@@ -119,7 +142,43 @@ export default function PassengerDetailPage() {
         </div>
       </div>
 
-      {/* No documents notice - removed since we now show all sections */}
+      {passenger.rejectionReason && (
+        <div className="card" style={{ marginTop: "1rem" }}>
+          <div className="error-msg">
+            <strong>Rejection reason:</strong> {passenger.rejectionReason}
+          </div>
+        </div>
+      )}
+
+      {passenger.verificationStatus === "PENDING" && (
+        <div className="card" style={{ marginTop: "1rem" }}>
+          <h3 style={{ marginBottom: "0.75rem" }}>Verification Decision</h3>
+          <div className="form-group">
+            <label>Reason (required for rejection)</label>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Enter reason..."
+            />
+          </div>
+          <div className="actions-bar">
+            <button
+              className="btn btn-success"
+              onClick={() => handleVerify("VERIFIED")}
+              disabled={actionLoading}
+            >
+              Approve
+            </button>
+            <button
+              className="btn btn-danger"
+              onClick={() => handleVerify("REJECTED")}
+              disabled={actionLoading}
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

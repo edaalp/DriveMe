@@ -1,9 +1,11 @@
 package com.driveme.backend.service;
 
+import com.driveme.backend.common.VerificationStatus;
 import com.driveme.backend.entity.Passenger;
 import com.driveme.backend.helper.PassengerMapper;
 import com.driveme.backend.repository.PassengerRepository;
 import com.driveme.backend.auth.PassengerSignUpRequest;
+import com.driveme.backend.dto.PassengerDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -141,6 +143,36 @@ public class PassengerService {
     /** Find passenger by UUID. */
     public Optional<Passenger> findById(java.util.UUID id) {
         return passengerRepository.findById(id);
+    }
+
+    /** Get all passengers by verification status. */
+    public List<PassengerDTO> getPassengersByVerificationStatus(VerificationStatus status) {
+        return passengerRepository.findByVerificationStatus(status)
+                .stream()
+                .map(passengerMapper::toDTO)
+                .toList();
+    }
+
+    /** Verify (approve or reject) a passenger. */
+    @Transactional
+    public PassengerDTO verifyPassenger(UUID id, VerificationStatus decision, String reason) {
+        Passenger passenger = passengerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Passenger not found"));
+
+        if (decision == VerificationStatus.REJECTED && (reason == null || reason.isBlank())) {
+            throw new IllegalArgumentException("Reason is required when rejecting");
+        }
+
+        passenger.setVerificationStatus(decision);
+        if (decision == VerificationStatus.REJECTED) {
+            passenger.setRejectionReason(reason);
+        } else {
+            passenger.setRejectionReason(null);
+        }
+
+        Passenger updated = passengerRepository.save(passenger);
+        log.info("Passenger {} verification status set to {}", id, decision);
+        return passengerMapper.toDTO(updated);
     }
 
     // ── File storage helpers ──────────────────────────────────────────────────

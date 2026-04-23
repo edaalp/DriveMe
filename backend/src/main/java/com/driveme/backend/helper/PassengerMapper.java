@@ -65,6 +65,8 @@ public class PassengerMapper {
         response.setTcPhotoFrontUrl(passenger.getTcPhotoFrontUrl());
         response.setTcPhotoBackUrl(passenger.getTcPhotoBackUrl());
         response.setProfilePictureUrl(passenger.getProfilePictureUrl());
+        response.setVerificationStatus(passenger.getVerificationStatus());
+        response.setRejectionReason(passenger.getRejectionReason());
         return response;
     }
 }

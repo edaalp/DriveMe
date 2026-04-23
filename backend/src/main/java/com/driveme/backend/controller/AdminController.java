@@ -195,12 +195,30 @@ public class AdminController {
     // ==================== Passenger Management ====================
 
     @GetMapping("/passengers")
-    @Operation(summary = "List passengers", description = "List all registered passengers")
-    public ResponseEntity<List<PassengerDTO>> getPassengers() {
-        List<PassengerDTO> passengers = passengerService.findAll()
-                .stream()
-                .map(passengerMapper::toDTO)
-                .toList();
+    @Operation(summary = "List passengers", description = "List passengers, optionally filtered by verification status")
+    public ResponseEntity<List<PassengerDTO>> getPassengers(
+            @RequestParam(required = false, name = "status") String statusParam) {
+        log.info("Fetching passengers with statusParam: {}", statusParam);
+        List<PassengerDTO> passengers;
+        
+        if (statusParam != null && !statusParam.isEmpty()) {
+            try {
+                VerificationStatus status = VerificationStatus.valueOf(statusParam.toUpperCase());
+                log.info("Converted statusParam '{}' to enum: {}", statusParam, status);
+                passengers = passengerService.getPassengersByVerificationStatus(status);
+            } catch (IllegalArgumentException e) {
+                log.error("Invalid status parameter: {}", statusParam, e);
+                return ResponseEntity.badRequest().body(List.of());
+            }
+        } else {
+            log.info("No status parameter provided, fetching all passengers");
+            passengers = passengerService.findAll()
+                    .stream()
+                    .map(passengerMapper::toDTO)
+                    .toList();
+        }
+        
+        log.info("Returning {} passengers", passengers.size());
         return ResponseEntity.ok(passengers);
     }
 
@@ -211,6 +229,25 @@ public class AdminController {
                 .map(passengerMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/passengers/{id}/verify")
+    @Operation(summary = "Verify passenger", description = "Approve or reject a passenger")
+    public ResponseEntity<?> verifyPassenger(
+            @PathVariable UUID id,
+            @Valid @RequestBody VerificationDecisionRequest request) {
+        try {
+            if (request.getDecision() == VerificationStatus.REJECTED
+                    && (request.getReason() == null || request.getReason().isBlank())) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Reason is required when rejecting"));
+            }
+
+            PassengerDTO updated = passengerService.verifyPassenger(id, request.getDecision(), request.getReason());
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 
     // ==================== Reported Issues ====================
@@ -234,14 +271,16 @@ public class AdminController {
     // ==================== Dashboard Stats ====================
 
     @GetMapping("/stats")
-    @Operation(summary = "Dashboard stats", description = "Get counts of pending vehicles and drivers")
+    @Operation(summary = "Dashboard stats", description = "Get counts of pending vehicles, drivers, and passengers")
     public ResponseEntity<Map<String, Object>> getStats() {
         long pendingVehicles = vehicleService.getVehiclesByStatus(VerificationStatus.PENDING).size();
         long pendingDrivers = driverService.getDriversByVerificationStatus(VerificationStatus.PENDING).size();
+        long pendingPassengers = passengerService.getPassengersByVerificationStatus(VerificationStatus.PENDING).size();
 
         return ResponseEntity.ok(Map.of(
                 "pendingVehicles", pendingVehicles,
-                "pendingDrivers", pendingDrivers
+                "pendingDrivers", pendingDrivers,
+                "pendingPassengers", pendingPassengers
         ));
     }
 
