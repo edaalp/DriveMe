@@ -38,6 +38,7 @@ public class DriverService {
     private final DriverRepository driverRepository;
     private final DriverMapper driverMapper;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
@@ -317,11 +318,26 @@ public class DriverService {
             throw new IllegalArgumentException("Decision must be VERIFIED or REJECTED");
         }
 
+        VerificationStatus previousStatus = driver.getVerificationStatus();
+
         driver.setVerificationStatus(decision);
         driver.setRejectionReason(decision == VerificationStatus.REJECTED ? reason : null);
 
         Driver saved = driverRepository.save(driver);
         log.info("Driver {} verification updated to: {}", driverId, decision);
+
+        // Fire the "account approved" notification email when, and only when,
+        // the driver transitions into VERIFIED from any other state. We avoid
+        // re-spamming if an already-verified driver is "approved" again and
+        // we never email on REJECTED — that path is silent by design.
+        // EmailService itself logs-and-swallows SMTP errors, so this call
+        // can never break the admin approval transaction.
+        if (decision == VerificationStatus.VERIFIED
+                && previousStatus != VerificationStatus.VERIFIED) {
+            emailService.sendDriverApprovedNotification(
+                    saved.getEmail(), saved.getFullName());
+        }
+
         return driverMapper.toResponse(saved);
     }
 
