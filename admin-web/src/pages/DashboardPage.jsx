@@ -32,6 +32,14 @@ export default function DashboardPage() {
           <div className="number">{stats.pendingDrivers}</div>
           <div className="label">Pending Drivers</div>
         </div>
+        <div
+          className="card stat-card"
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate("/passengers")}
+        >
+          <div className="number">{stats.pendingPassengers ?? 0}</div>
+          <div className="label">Pending Passengers</div>
+        </div>
       </div>
     </div>
   );
