@@ -20,6 +20,8 @@ public class MatchingStatusDTO {
 
     private UUID tripId;
     private RequestStatus status;
+    /** ID of the confirmed {@code Trip} entity once the request is MATCHED. Null while still pending. */
+    private UUID tripEntityId;
 
     // Matching counters
     private int notifiedDriversCount;

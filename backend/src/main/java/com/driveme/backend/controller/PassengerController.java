@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -72,6 +73,37 @@ public class PassengerController {
                 .map(passengerMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Return the currently-authenticated passenger's profile.
+     *
+     * <p>Used by the Flutter app right after login to refresh the cached
+     * profile picture URL (selfie uploaded at sign-up) and other fields,
+     * mirroring {@code GET /api/drivers/me} for the driver flow.
+     *
+     * <p>The passenger ID is resolved from the JWT principal set by
+     * {@link com.driveme.backend.config.JwtAuthenticationFilter}; we never
+     * trust client-supplied IDs here.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentPassenger(Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        final UUID passengerId;
+        try {
+            passengerId = UUID.fromString(authentication.getPrincipal().toString());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid passenger principal in JWT: {}", authentication.getPrincipal());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return passengerService.findById(passengerId)
+                .map(passengerMapper::toDTO)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     /**

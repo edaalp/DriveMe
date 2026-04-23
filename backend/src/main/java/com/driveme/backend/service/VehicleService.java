@@ -27,6 +27,7 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final PassengerRepository passengerRepository;
+    private final EmailService emailService;
 
     /**
      * Get all vehicles for a passenger.
@@ -139,11 +140,49 @@ public class VehicleService {
             throw new IllegalArgumentException("Decision must be VERIFIED or REJECTED");
         }
 
+        VerificationStatus previousStatus = vehicle.getStatus();
+
         vehicle.setStatus(decision);
         vehicle.setRejectionReason(decision == VerificationStatus.REJECTED ? reason : null);
 
         Vehicle saved = vehicleRepository.save(vehicle);
+
+        // Notify the owning passenger only on a fresh PENDING/REJECTED ->
+        // VERIFIED transition. The LAZY `passenger` association is safely
+        // accessible here because we're still inside the @Transactional
+        // scope of this method. The helper itself swallows SMTP errors,
+        // so admin approval will never fail because of a flaky mail server.
+        if (decision == VerificationStatus.VERIFIED
+                && previousStatus != VerificationStatus.VERIFIED) {
+            Passenger owner = saved.getPassenger();
+            if (owner != null) {
+                String vehicleLabel = buildVehicleLabel(saved);
+                emailService.sendVehicleApprovedNotification(
+                        owner.getEmail(),
+                        owner.getFullName(),
+                        vehicleLabel,
+                        saved.getPlateNumber());
+            }
+        }
+
         return VehicleMapper.toDTO(saved);
+    }
+
+    /**
+     * Human-readable vehicle description for notification emails,
+     * e.g. {@code "Toyota Corolla (2021)"}. Falls back gracefully when
+     * individual fields are null.
+     */
+    private static String buildVehicleLabel(Vehicle vehicle) {
+        String brand = vehicle.getBrand() == null ? "" : vehicle.getBrand().trim();
+        String model = vehicle.getModel() == null ? "" : vehicle.getModel().trim();
+        Integer year = vehicle.getYear();
+
+        String base = (brand + " " + model).trim();
+        if (base.isEmpty()) {
+            base = "Your vehicle";
+        }
+        return year != null ? base + " (" + year + ")" : base;
     }
 
     @Transactional(readOnly = true)

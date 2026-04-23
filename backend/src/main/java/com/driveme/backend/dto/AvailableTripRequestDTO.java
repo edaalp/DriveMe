@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -19,6 +20,12 @@ import java.util.UUID;
 public class AvailableTripRequestDTO {
 
     private UUID tripId;
+
+    /**
+     * When the passenger posted this request. Clients display it as
+     * "X minutes ago" in the driver's list view.
+     */
+    private Instant requestedTime;
 
     // Passenger info
     private String passengerName;
