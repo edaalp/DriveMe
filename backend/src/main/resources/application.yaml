@@ -7,13 +7,13 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 15MB
-  
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://ep-aged-star-aldavdxb-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require}
     username: ${SPRING_DATASOURCE_USERNAME:neondb_owner}
     password: ${SPRING_DATASOURCE_PASSWORD:npg_DCGja3Q8Etuy}
     driver-class-name: org.postgresql.Driver
-  
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -21,7 +21,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-  
+
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -69,3 +69,8 @@ logging:
   level:
     root: INFO
     com.driveme.backend: INFO
+
+management:
+  health:
+    mail:
+      enabled: false

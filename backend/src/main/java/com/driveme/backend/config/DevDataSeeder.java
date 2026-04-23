@@ -2,9 +2,11 @@ package com.driveme.backend.config;
 
 import com.driveme.backend.common.TransmissionType;
 import com.driveme.backend.common.VerificationStatus;
+import com.driveme.backend.entity.Admin;
 import com.driveme.backend.entity.Driver;
 import com.driveme.backend.entity.Passenger;
 import com.driveme.backend.entity.Vehicle;
+import com.driveme.backend.repository.AdminRepository;
 import com.driveme.backend.repository.DriverRepository;
 import com.driveme.backend.repository.PassengerRepository;
 import com.driveme.backend.repository.VehicleRepository;
@@ -31,13 +33,43 @@ public class DevDataSeeder implements CommandLineRunner {
     private final DriverRepository driverRepository;
     private final PassengerRepository passengerRepository;
     private final VehicleRepository vehicleRepository;
+    private final AdminRepository adminRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
+        seedAdmin();
         seedPassengersAndVehicles();
         seedDrivers();
         log.info("Dev seed data loaded successfully");
+    }
+
+    private void seedAdmin() {
+        String email = "admin@driveme.com";
+        String plainPassword = "admin123";
+        String hashedPassword = passwordEncoder.encode(plainPassword);
+
+        if (adminRepository.existsByEmail(email)) {
+            // Update existing admin's password to ensure consistent dev credentials
+            @SuppressWarnings("OptionalGetWithoutIsPresent")
+            Admin admin = adminRepository.findByEmail(email).get();
+            admin.setPasswordHash(hashedPassword);
+            admin.setFullName("Admin User");
+            admin.setActive(true);
+            adminRepository.save(admin);
+            log.info("Updated seed admin user: admin@driveme.com (password: {})", plainPassword);
+            return;
+        }
+
+        Admin admin = new Admin();
+        admin.setEmail(email);
+        admin.setFullName("Admin User");
+        admin.setUserName("admin");
+        admin.setPasswordHash(hashedPassword);
+        admin.setActive(true);
+        adminRepository.save(admin);
+
+        log.info("Seeded admin user: admin@driveme.com (password: {})", plainPassword);
     }
 
     private void seedPassengersAndVehicles() {

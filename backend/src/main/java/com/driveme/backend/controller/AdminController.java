@@ -192,6 +192,42 @@ public class AdminController {
                 .body(driver.getCriminalRecordFile());
     }
 
+    @GetMapping("/drivers/{id}/document/license")
+    @Operation(summary = "Download driver license", description = "Download a driver's license document from DB")
+    public ResponseEntity<byte[]> downloadDriverLicense(@PathVariable UUID id) {
+        Driver driver = driverService.getDriverEntityById(id);
+
+        if (driver.getDriverLicenseFile() == null || driver.getDriverLicenseFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(driver.getDriverLicenseFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + driver.getDriverLicenseFileName() + "\"")
+                .body(driver.getDriverLicenseFile());
+    }
+
+    @GetMapping("/drivers/{id}/document/profile-picture")
+    @Operation(summary = "Download profile picture", description = "Download a driver's profile picture from DB")
+    public ResponseEntity<byte[]> downloadProfilePicture(@PathVariable UUID id) {
+        Driver driver = driverService.getDriverEntityById(id);
+
+        if (driver.getProfilePictureFile() == null || driver.getProfilePictureFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(driver.getProfilePictureFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + driver.getProfilePictureFileName() + "\"")
+                .body(driver.getProfilePictureFile());
+    }
+
     // ==================== Passenger Management ====================
 
     @GetMapping("/passengers")
@@ -200,7 +236,7 @@ public class AdminController {
             @RequestParam(required = false, name = "status") String statusParam) {
         log.info("Fetching passengers with statusParam: {}", statusParam);
         List<PassengerDTO> passengers;
-        
+
         if (statusParam != null && !statusParam.isEmpty()) {
             try {
                 VerificationStatus status = VerificationStatus.valueOf(statusParam.toUpperCase());
@@ -217,7 +253,7 @@ public class AdminController {
                     .map(passengerMapper::toDTO)
                     .toList();
         }
-        
+
         log.info("Returning {} passengers", passengers.size());
         return ResponseEntity.ok(passengers);
     }
