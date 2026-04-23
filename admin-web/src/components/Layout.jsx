@@ -21,6 +21,8 @@ export default function Layout() {
           </NavLink>
           <NavLink to="/vehicles">Vehicles</NavLink>
           <NavLink to="/drivers">Drivers</NavLink>
+          <NavLink to="/passengers">Passengers</NavLink>
+          <NavLink to="/reported-issues">Reported Issues</NavLink>
         </nav>
         <div className="sidebar-footer">
           <div style={{ marginBottom: "0.5rem", fontSize: "0.8rem" }}>

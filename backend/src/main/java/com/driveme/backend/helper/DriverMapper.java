@@ -13,23 +13,12 @@ import java.util.Optional;
 @Component
 public class DriverMapper {
 
-    @Value("${app.public-base-url:http://localhost:8080}")
+    @Value("${app.public-base-url:http://10.0.2.2:8080}")
     private String publicBaseUrl;
 
-    /**
-     * Convert sign-up request DTO to Driver entity.
-     *
-     * @param request the sign-up request
-     * @param hashedPassword the hashed password
-     * @param driverLicenseDocumentUrl stored public path for license file
-     * @param criminalRecordDocumentUrl stored public path for criminal record file
-     * @return the driver entity
-     */
     public Driver toEntity(
             com.driveme.backend.dto.DriverSignUpRequest request,
-            String hashedPassword,
-            String driverLicenseDocumentUrl,
-            String criminalRecordDocumentUrl) {
+            String hashedPassword) {
         Driver driver = new Driver();
 
         driver.setEmail(request.getEmail());
@@ -48,10 +37,6 @@ public class DriverMapper {
         driver.setTckNo(request.getTckNo());
         driver.setDriverLicenseNumber(request.getDriverLicenseNumber());
         driver.setLicenseIssueDate(request.getLicenseIssueDate());
-        driver.setCriminalRecordFile(null);
-        driver.setCriminalRecordFileName(request.getCriminalRecordFileName());
-        driver.setDriverLicenseDocumentUrl(driverLicenseDocumentUrl);
-        driver.setCriminalRecordDocumentUrl(criminalRecordDocumentUrl);
 
         return driver;
     }
@@ -68,6 +53,11 @@ public class DriverMapper {
             return null;
         }
 
+        String base = publicBaseUrl.endsWith("/")
+                ? publicBaseUrl.substring(0, publicBaseUrl.length() - 1)
+                : publicBaseUrl;
+        String idStr = driver.getId().toString();
+
         DriverResponse response = new DriverResponse();
         response.setId(driver.getId());
         response.setEmail(driver.getEmail());
@@ -81,31 +71,23 @@ public class DriverMapper {
         response.setDriverLicenseNumber(driver.getDriverLicenseNumber());
         response.setLicenseIssueDate(driver.getLicenseIssueDate());
         response.setCriminalRecordFileName(driver.getCriminalRecordFileName());
+
         response.setDriverLicenseDocumentUrl(
-                toPublicUrl(driver.getDriverLicenseDocumentUrl()));
+                driver.getDriverLicenseFile() != null
+                        ? base + "/api/admin/drivers/" + idStr + "/document/license"
+                        : null);
         response.setCriminalRecordDocumentUrl(
-                toPublicUrl(driver.getCriminalRecordDocumentUrl()));
+                driver.getCriminalRecordFile() != null
+                        ? base + "/api/admin/drivers/" + idStr + "/document/criminal-record"
+                        : null);
+        response.setProfilePictureUrl(
+                driver.getProfilePictureFile() != null
+                        ? base + "/api/admin/drivers/" + idStr + "/document/profile-picture"
+                        : null);
+
         response.setVerificationStatus(driver.getVerificationStatus());
         response.setRejectionReason(driver.getRejectionReason());
 
         return response;
-    }
-
-    /**
-     * Turns stored paths like {@code /uploads/drivers/x.pdf} into browser-openable absolute URLs.
-     */
-    private String toPublicUrl(String pathOrUrl) {
-        if (pathOrUrl == null || pathOrUrl.isBlank()) {
-            return null;
-        }
-        String trimmed = pathOrUrl.trim();
-        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-            return trimmed;
-        }
-        String base = publicBaseUrl.endsWith("/")
-                ? publicBaseUrl.substring(0, publicBaseUrl.length() - 1)
-                : publicBaseUrl;
-        String path = trimmed.startsWith("/") ? trimmed : "/" + trimmed;
-        return base + path;
     }
 }

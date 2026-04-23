@@ -23,6 +23,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
+                "http://127.0.0.1:5173",
                 "http://localhost:3000"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
@@ -32,6 +33,8 @@ public class CorsConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
+        // Static uploads (license PDFs, selfies) loaded from admin SPA / img / iframe
+        source.registerCorsConfiguration("/uploads/**", config);
         return source;
     }
 }

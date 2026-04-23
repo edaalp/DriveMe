@@ -3,14 +3,19 @@ package com.driveme.backend.controller;
 import com.driveme.backend.common.VerificationStatus;
 import com.driveme.backend.dto.AdminSignUpRequest;
 import com.driveme.backend.dto.DriverResponse;
+import com.driveme.backend.dto.PassengerDTO;
+import com.driveme.backend.dto.ReportedIssueDTO;
 import com.driveme.backend.dto.VehicleDTO;
 import com.driveme.backend.dto.VerificationDecisionRequest;
 import com.driveme.backend.entity.Admin;
 import com.driveme.backend.entity.Driver;
 import com.driveme.backend.entity.Vehicle;
 import com.driveme.backend.helper.DriverMapper;
+import com.driveme.backend.helper.PassengerMapper;
 import com.driveme.backend.service.AdminService;
 import com.driveme.backend.service.DriverService;
+import com.driveme.backend.service.ReportedIssueService;
+import com.driveme.backend.service.PassengerService;
 import com.driveme.backend.service.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,6 +47,9 @@ public class AdminController {
     private final VehicleService vehicleService;
     private final DriverService driverService;
     private final DriverMapper driverMapper;
+    private final PassengerService passengerService;
+    private final PassengerMapper passengerMapper;
+    private final ReportedIssueService reportedIssueService;
 
     @Value("${admin.signup-secret}")
     private String signupSecret;
@@ -184,17 +192,131 @@ public class AdminController {
                 .body(driver.getCriminalRecordFile());
     }
 
+    @GetMapping("/drivers/{id}/document/license")
+    @Operation(summary = "Download driver license", description = "Download a driver's license document from DB")
+    public ResponseEntity<byte[]> downloadDriverLicense(@PathVariable UUID id) {
+        Driver driver = driverService.getDriverEntityById(id);
+
+        if (driver.getDriverLicenseFile() == null || driver.getDriverLicenseFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(driver.getDriverLicenseFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + driver.getDriverLicenseFileName() + "\"")
+                .body(driver.getDriverLicenseFile());
+    }
+
+    @GetMapping("/drivers/{id}/document/profile-picture")
+    @Operation(summary = "Download profile picture", description = "Download a driver's profile picture from DB")
+    public ResponseEntity<byte[]> downloadProfilePicture(@PathVariable UUID id) {
+        Driver driver = driverService.getDriverEntityById(id);
+
+        if (driver.getProfilePictureFile() == null || driver.getProfilePictureFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(driver.getProfilePictureFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + driver.getProfilePictureFileName() + "\"")
+                .body(driver.getProfilePictureFile());
+    }
+
+    // ==================== Passenger Management ====================
+
+    @GetMapping("/passengers")
+    @Operation(summary = "List passengers", description = "List passengers, optionally filtered by verification status")
+    public ResponseEntity<List<PassengerDTO>> getPassengers(
+            @RequestParam(required = false, name = "status") String statusParam) {
+        log.info("Fetching passengers with statusParam: {}", statusParam);
+        List<PassengerDTO> passengers;
+
+        if (statusParam != null && !statusParam.isEmpty()) {
+            try {
+                VerificationStatus status = VerificationStatus.valueOf(statusParam.toUpperCase());
+                log.info("Converted statusParam '{}' to enum: {}", statusParam, status);
+                passengers = passengerService.getPassengersByVerificationStatus(status);
+            } catch (IllegalArgumentException e) {
+                log.error("Invalid status parameter: {}", statusParam, e);
+                return ResponseEntity.badRequest().body(List.of());
+            }
+        } else {
+            log.info("No status parameter provided, fetching all passengers");
+            passengers = passengerService.findAll()
+                    .stream()
+                    .map(passengerMapper::toDTO)
+                    .toList();
+        }
+
+        log.info("Returning {} passengers", passengers.size());
+        return ResponseEntity.ok(passengers);
+    }
+
+    @GetMapping("/passengers/{id}")
+    @Operation(summary = "Get passenger detail", description = "Get full passenger details for admin review")
+    public ResponseEntity<?> getPassengerById(@PathVariable UUID id) {
+        return passengerService.findById(id)
+                .map(passengerMapper::toDTO)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/passengers/{id}/verify")
+    @Operation(summary = "Verify passenger", description = "Approve or reject a passenger")
+    public ResponseEntity<?> verifyPassenger(
+            @PathVariable UUID id,
+            @Valid @RequestBody VerificationDecisionRequest request) {
+        try {
+            if (request.getDecision() == VerificationStatus.REJECTED
+                    && (request.getReason() == null || request.getReason().isBlank())) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Reason is required when rejecting"));
+            }
+
+            PassengerDTO updated = passengerService.verifyPassenger(id, request.getDecision(), request.getReason());
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    // ==================== Reported Issues ====================
+
+    @GetMapping("/reported-issues")
+    @Operation(summary = "List reported issues", description = "Get all issues reported by passengers and drivers, newest first")
+    public ResponseEntity<List<ReportedIssueDTO>> getReportedIssues() {
+        return ResponseEntity.ok(reportedIssueService.findAll());
+    }
+
+    @PutMapping("/reported-issues/{id}/resolve")
+    @Operation(summary = "Resolve issue", description = "Mark a reported issue as resolved")
+    public ResponseEntity<?> resolveIssue(@PathVariable UUID id) {
+        try {
+            return ResponseEntity.ok(reportedIssueService.resolve(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // ==================== Dashboard Stats ====================
 
     @GetMapping("/stats")
-    @Operation(summary = "Dashboard stats", description = "Get counts of pending vehicles and drivers")
+    @Operation(summary = "Dashboard stats", description = "Get counts of pending vehicles, drivers, and passengers")
     public ResponseEntity<Map<String, Object>> getStats() {
         long pendingVehicles = vehicleService.getVehiclesByStatus(VerificationStatus.PENDING).size();
         long pendingDrivers = driverService.getDriversByVerificationStatus(VerificationStatus.PENDING).size();
+        long pendingPassengers = passengerService.getPassengersByVerificationStatus(VerificationStatus.PENDING).size();
 
         return ResponseEntity.ok(Map.of(
                 "pendingVehicles", pendingVehicles,
-                "pendingDrivers", pendingDrivers
+                "pendingDrivers", pendingDrivers,
+                "pendingPassengers", pendingPassengers
         ));
     }
 

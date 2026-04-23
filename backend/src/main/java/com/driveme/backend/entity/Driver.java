@@ -1,13 +1,13 @@
 package com.driveme.backend.entity;
 
-import java.util.Date;
-
 import com.driveme.backend.common.VerificationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import java.util.Date;
 
 /**
  * Driver user type.
@@ -46,6 +46,16 @@ public class Driver extends BaseUser {
 
     private String criminalRecordFileName;
 
+    @Lob
+    private byte[] driverLicenseFile;
+
+    private String driverLicenseFileName;
+
+    @Lob
+    private byte[] profilePictureFile;
+
+    private String profilePictureFileName;
+
     /** Public URL path under {@code /uploads/drivers/...} for the uploaded license scan. */
     @Column(length = 512)
     private String driverLicenseDocumentUrl;
@@ -53,6 +63,10 @@ public class Driver extends BaseUser {
     /** Public URL path under {@code /uploads/drivers/...} for the criminal record document. */
     @Column(length = 512)
     private String criminalRecordDocumentUrl;
+
+    /** Absolute or path-style URL for the driver's profile (selfie) image, exposed under {@code /uploads/...}. */
+    @Column(length = 512)
+    private String profilePictureUrl;
 
     @Enumerated(EnumType.STRING)
     private VerificationStatus verificationStatus = VerificationStatus.PENDING;

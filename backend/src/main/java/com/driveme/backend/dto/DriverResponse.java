@@ -33,6 +33,8 @@ public class DriverResponse {
     private String driverLicenseDocumentUrl;
     /** URL path for the criminal record document. */
     private String criminalRecordDocumentUrl;
+    /** Profile (selfie) image URL. */
+    private String profilePictureUrl;
     private VerificationStatus verificationStatus;
     private String rejectionReason;
 }

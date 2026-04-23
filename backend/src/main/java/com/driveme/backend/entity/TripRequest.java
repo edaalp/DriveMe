@@ -71,6 +71,17 @@ public class TripRequest extends BaseEntity {
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
 
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "amount", column = @Column(name = "offer_amount")),
+            @AttributeOverride(name = "currency", column = @Column(name = "offer_currency"))
+    })
+    private Money offerAmount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "matched_driver_id")
+    private Driver matchedDriver;
+
     /**
      * Calculate distance between pickup and destination in kilometers.
      */
@@ -98,6 +109,18 @@ public class TripRequest extends BaseEntity {
     public void expire() {
         if (this.status == RequestStatus.PENDING) {
             this.status = RequestStatus.EXPIRED;
+        }
+    }
+
+    /**
+     * Mark this request as matched with a driver.
+     */
+    public void markMatched(Driver driver) {
+        if (this.status == RequestStatus.PENDING) {
+            this.status = RequestStatus.MATCHED;
+            this.matchedDriver = driver;
+        } else {
+            throw new IllegalStateException("Cannot match a request that is not pending");
         }
     }
 

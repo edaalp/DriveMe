@@ -35,6 +35,8 @@ public final class TripRequestMapper {
                 .minPriceCurrency(tripRequest.getMinPrice() != null ? tripRequest.getMinPrice().getCurrency() : null)
                 .maxPriceAmount(tripRequest.getMaxPrice() != null ? tripRequest.getMaxPrice().getAmount() : null)
                 .maxPriceCurrency(tripRequest.getMaxPrice() != null ? tripRequest.getMaxPrice().getCurrency() : null)
+                .offerAmount(tripRequest.getOfferAmount() != null ? tripRequest.getOfferAmount().getAmount() : null)
+                .offerCurrency(tripRequest.getOfferAmount() != null ? tripRequest.getOfferAmount().getCurrency() : null)
                 .pickup(toLocationDTO(tripRequest.getPickup()))
                 .destination(toLocationDTO(tripRequest.getDestination()))
                 .distanceKm(tripRequest.getDistanceKm())
@@ -60,6 +62,9 @@ public final class TripRequestMapper {
         tripRequest.setDestination(toLocation(request.getDestination()));
         tripRequest.setPassenger(passenger);
         tripRequest.setVehicle(vehicle);
+        if (request.getOfferAmount() != null) {
+            tripRequest.setOfferAmount(Money.ofTRY(request.getOfferAmount()));
+        }
         return tripRequest;
     }
 

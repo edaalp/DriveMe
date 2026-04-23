@@ -29,4 +29,7 @@ public class PassengerSignUpRequest {
 
     @NotBlank(message = "Password is required")
     private String confirmPassword;
+
+    /** Turkish national ID number (TC Kimlik No). */
+    private Long tcNo;
 }

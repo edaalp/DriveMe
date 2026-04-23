@@ -2,10 +2,12 @@ package com.driveme.backend.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -29,6 +31,9 @@ public class CreateTripRequestRequest {
     @NotNull(message = "Destination location is required")
     @Valid
     private LocationDTO destination;
+
+    @Positive(message = "Offer amount must be positive")
+    private BigDecimal offerAmount;
 
     /**
      * Optional: Vehicle ID if passenger wants to use their own vehicle.

@@ -30,6 +30,10 @@ public class TripRequestDTO {
     private BigDecimal maxPriceAmount;
     private String maxPriceCurrency;
 
+    // Offer amount
+    private BigDecimal offerAmount;
+    private String offerCurrency;
+
     // Locations
     private LocationDTO pickup;
     private LocationDTO destination;
