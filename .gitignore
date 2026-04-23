@@ -219,6 +219,10 @@ mobile/ios/Runner/GoogleService-Info.plist
 *.sqlite3
 *.db
 
+# Flyway migrations are part of source code and MUST be tracked
+# (the *.sql rule above would otherwise hide them).
+!**/src/main/resources/db/migration/**/*.sql
+
 # ===========================
 # Testing
 # ===========================
