@@ -1,5 +1,6 @@
 package com.driveme.backend.dto;
 
+import com.driveme.backend.common.VerificationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,4 +20,10 @@ public class PassengerDTO {
     private String fullName;
     private String phoneNumber;
     private boolean active;
+    private Long tcNo;
+    private String tcPhotoFrontUrl;
+    private String tcPhotoBackUrl;
+    private String profilePictureUrl;
+    private VerificationStatus verificationStatus;
+    private String rejectionReason;
 }

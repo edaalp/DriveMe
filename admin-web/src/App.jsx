@@ -8,6 +8,9 @@ import VehiclesPage from "./pages/VehiclesPage";
 import VehicleDetailPage from "./pages/VehicleDetailPage";
 import DriversPage from "./pages/DriversPage";
 import DriverDetailPage from "./pages/DriverDetailPage";
+import PassengersPage from "./pages/PassengersPage";
+import PassengerDetailPage from "./pages/PassengerDetailPage";
+import ReportedIssuesPage from "./pages/ReportedIssuesPage";
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
@@ -37,6 +40,9 @@ function AppRoutes() {
         <Route path="vehicles/:id" element={<VehicleDetailPage />} />
         <Route path="drivers" element={<DriversPage />} />
         <Route path="drivers/:id" element={<DriverDetailPage />} />
+        <Route path="passengers" element={<PassengersPage />} />
+        <Route path="passengers/:id" element={<PassengerDetailPage />} />
+        <Route path="reported-issues" element={<ReportedIssuesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

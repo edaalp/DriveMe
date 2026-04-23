@@ -60,13 +60,44 @@ export function resolveAssetUrl(url) {
 
 /** Opens absolute or backend-relative document URLs in a new browser tab. */
 export function openDocumentUrl(url) {
-  const href = resolveAssetUrl(url);
+  let href = url;
+  // If it's already a full URL (starts with http), use it directly
+  if (!url.startsWith("http")) {
+    href = resolveAssetUrl(url);
+  }
   if (!href) return;
   window.open(href, "_blank", "noopener,noreferrer");
 }
 
 export function hasDocumentUrl(url) {
   return typeof url === "string" && url.trim().length > 0;
+}
+
+/**
+ * Generates the download URL for a passenger's profile picture from the database.
+ * @param {string} passengerId The passenger UUID
+ * @returns {string} The API endpoint URL
+ */
+export function getPassengerProfilePictureUrl(passengerId) {
+  return `${API_ORIGIN}/api/passengers/${passengerId}/document/profile-picture`;
+}
+
+/**
+ * Generates the download URL for a passenger's TC photo front from the database.
+ * @param {string} passengerId The passenger UUID
+ * @returns {string} The API endpoint URL
+ */
+export function getPassengerTcPhotoFrontUrl(passengerId) {
+  return `${API_ORIGIN}/api/passengers/${passengerId}/document/tc-front`;
+}
+
+/**
+ * Generates the download URL for a passenger's TC photo back from the database.
+ * @param {string} passengerId The passenger UUID
+ * @returns {string} The API endpoint URL
+ */
+export function getPassengerTcPhotoBackUrl(passengerId) {
+  return `${API_ORIGIN}/api/passengers/${passengerId}/document/tc-back`;
 }
 
 api.interceptors.request.use((config) => {
