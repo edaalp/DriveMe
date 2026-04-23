@@ -29,6 +29,7 @@ import java.util.UUID;
  * Service for managing passenger operations.
  */
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
 public class PassengerService {

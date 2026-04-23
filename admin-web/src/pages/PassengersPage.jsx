@@ -36,13 +36,22 @@ export default function PassengersPage() {
     setActionLoading(true);
     try {
       await api.put(`/admin/passengers/${id}/verify`, { decision, reason });
-      setPassengers(
-        passengers.map((p) =>
-          p.id === id
-            ? { ...p, verificationStatus: decision, rejectionReason: reason }
-            : p
-        )
-      );
+
+      // Remove the passenger from the list if they no longer match the current filter
+      if (filter !== "ALL" && filter !== decision) {
+        // If we're filtering by status and the passenger's new status doesn't match, remove them
+        setPassengers(passengers.filter((p) => p.id !== id));
+      } else {
+        // Otherwise update the passenger in the list
+        setPassengers(
+          passengers.map((p) =>
+            p.id === id
+              ? { ...p, verificationStatus: decision, rejectionReason: reason }
+              : p
+          )
+        );
+      }
+
       setActioningId(null);
       setReason("");
     } catch (err) {

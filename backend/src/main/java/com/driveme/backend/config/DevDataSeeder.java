@@ -80,7 +80,7 @@ public class DevDataSeeder implements CommandLineRunner {
 
         String hashedPassword = passwordEncoder.encode("test123");
 
-        // Passenger 1
+        // Passenger 1 - PENDING
         Passenger p1 = new Passenger();
         p1.setEmail("ayse.yilmaz@example.com");
         p1.setFullName("Ayse Yilmaz");
@@ -88,13 +88,14 @@ public class DevDataSeeder implements CommandLineRunner {
         p1.setPhoneNumber("+905321234567");
         p1.setPasswordHash(hashedPassword);
         p1.setActive(true);
+        p1.setVerificationStatus(VerificationStatus.PENDING);
         if (!passengerRepository.existsByEmail(p1.getEmail())) {
             p1 = passengerRepository.save(p1);
         } else {
             p1 = passengerRepository.findByEmail(p1.getEmail()).get();
         }
 
-        // Passenger 2
+        // Passenger 2 - VERIFIED
         Passenger p2 = new Passenger();
         p2.setEmail("mehmet.kara@example.com");
         p2.setFullName("Mehmet Kara");
@@ -102,13 +103,14 @@ public class DevDataSeeder implements CommandLineRunner {
         p2.setPhoneNumber("+905559876543");
         p2.setPasswordHash(hashedPassword);
         p2.setActive(true);
+        p2.setVerificationStatus(VerificationStatus.VERIFIED);
         if (!passengerRepository.existsByEmail(p2.getEmail())) {
             p2 = passengerRepository.save(p2);
         } else {
             p2 = passengerRepository.findByEmail(p2.getEmail()).get();
         }
 
-        // Passenger 3
+        // Passenger 3 - PENDING
         Passenger p3 = new Passenger();
         p3.setEmail("zeynep.demir@example.com");
         p3.setFullName("Zeynep Demir");
@@ -116,10 +118,27 @@ public class DevDataSeeder implements CommandLineRunner {
         p3.setPhoneNumber("+905441112233");
         p3.setPasswordHash(hashedPassword);
         p3.setActive(true);
+        p3.setVerificationStatus(VerificationStatus.PENDING);
         if (!passengerRepository.existsByEmail(p3.getEmail())) {
             p3 = passengerRepository.save(p3);
         } else {
             p3 = passengerRepository.findByEmail(p3.getEmail()).get();
+        }
+
+        // Passenger 4 - REJECTED
+        Passenger p4 = new Passenger();
+        p4.setEmail("esra.gokcinar@example.com");
+        p4.setFullName("Esra Gokcinar");
+        p4.setUserName("esragokcinar");
+        p4.setPhoneNumber("+905953021287");
+        p4.setPasswordHash(hashedPassword);
+        p4.setActive(true);
+        p4.setVerificationStatus(VerificationStatus.REJECTED);
+        p4.setRejectionReason("Document verification failed - invalid TC number");
+        if (!passengerRepository.existsByEmail(p4.getEmail())) {
+            p4 = passengerRepository.save(p4);
+        } else {
+            p4 = passengerRepository.findByEmail(p4.getEmail()).get();
         }
 
         byte[] fakePdf = buildFakePdf("Vehicle Registration Certificate");
@@ -137,14 +156,14 @@ public class DevDataSeeder implements CommandLineRunner {
         v1.setDocumentFileName("toyota_corolla_ruhsat.pdf");
         vehicleRepository.save(v1);
 
-        // Vehicle 2 - PENDING with document
+        // Vehicle 2 - VERIFIED with document
         Vehicle v2 = new Vehicle();
         v2.setPlateNumber("06 DEF 456");
         v2.setBrand("Honda");
         v2.setModel("Civic");
         v2.setYear(2023);
         v2.setTransmission(TransmissionType.AUTOMATIC);
-        v2.setStatus(VerificationStatus.PENDING);
+        v2.setStatus(VerificationStatus.VERIFIED);
         v2.setPassenger(p2);
         v2.setDocumentFile(fakePdf);
         v2.setDocumentFileName("honda_civic_registration.pdf");
@@ -169,12 +188,12 @@ public class DevDataSeeder implements CommandLineRunner {
         v4.setYear(2024);
         v4.setTransmission(TransmissionType.AUTOMATIC);
         v4.setStatus(VerificationStatus.VERIFIED);
-        v4.setPassenger(p1);
+        v4.setPassenger(p2);
         v4.setDocumentFile(fakePdf);
         v4.setDocumentFileName("bmw_320i_ruhsat.pdf");
         vehicleRepository.save(v4);
 
-        log.info("Seeded 3 passengers and 4 vehicles (3 pending, 1 verified)");
+        log.info("Seeded 4 passengers (1 pending, 1 verified, 1 pending, 1 rejected) and 4 vehicles");
     }
 
     private void seedDrivers() {
