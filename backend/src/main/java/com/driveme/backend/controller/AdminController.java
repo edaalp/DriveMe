@@ -4,6 +4,7 @@ import com.driveme.backend.common.VerificationStatus;
 import com.driveme.backend.dto.AdminSignUpRequest;
 import com.driveme.backend.dto.DriverResponse;
 import com.driveme.backend.dto.PassengerDTO;
+import com.driveme.backend.dto.ReportedIssueDTO;
 import com.driveme.backend.dto.VehicleDTO;
 import com.driveme.backend.dto.VerificationDecisionRequest;
 import com.driveme.backend.entity.Admin;
@@ -13,6 +14,7 @@ import com.driveme.backend.helper.DriverMapper;
 import com.driveme.backend.helper.PassengerMapper;
 import com.driveme.backend.service.AdminService;
 import com.driveme.backend.service.DriverService;
+import com.driveme.backend.service.ReportedIssueService;
 import com.driveme.backend.service.PassengerService;
 import com.driveme.backend.service.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,6 +49,7 @@ public class AdminController {
     private final DriverMapper driverMapper;
     private final PassengerService passengerService;
     private final PassengerMapper passengerMapper;
+    private final ReportedIssueService reportedIssueService;
 
     @Value("${admin.signup-secret}")
     private String signupSecret;
@@ -208,6 +211,24 @@ public class AdminController {
                 .map(passengerMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // ==================== Reported Issues ====================
+
+    @GetMapping("/reported-issues")
+    @Operation(summary = "List reported issues", description = "Get all issues reported by passengers and drivers, newest first")
+    public ResponseEntity<List<ReportedIssueDTO>> getReportedIssues() {
+        return ResponseEntity.ok(reportedIssueService.findAll());
+    }
+
+    @PutMapping("/reported-issues/{id}/resolve")
+    @Operation(summary = "Resolve issue", description = "Mark a reported issue as resolved")
+    public ResponseEntity<?> resolveIssue(@PathVariable UUID id) {
+        try {
+            return ResponseEntity.ok(reportedIssueService.resolve(id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // ==================== Dashboard Stats ====================
