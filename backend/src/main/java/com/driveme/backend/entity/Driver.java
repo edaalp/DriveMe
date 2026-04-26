@@ -31,8 +31,6 @@ public class Driver extends BaseUser {
 
     private boolean acceptsPets;
 
-    private double avgRating;
-
     private long tckNo;
 
     private String driverLicenseNumber;
