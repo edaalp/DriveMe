@@ -49,6 +49,7 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                        "/ws-chat/**",
                     // Auth endpoints
                     "/api/auth/login",
                     "/api/auth/forgot-password",

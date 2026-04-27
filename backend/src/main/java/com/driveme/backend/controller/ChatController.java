@@ -42,7 +42,7 @@ public class ChatController {
     // REST endpoint to load chat history on page open
     @GetMapping("/api/messages/{rideId}")
     @ResponseBody
-    public List<Message> getHistory(@PathVariable Long rideId) {
+    public List<Message> getHistory(@PathVariable String rideId) {
         return messageRepo.findByRideIdOrderBySentAtAsc(rideId);
     }
 

@@ -16,10 +16,10 @@ import java.time.LocalDateTime;
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    private Long rideId;
-    private Long senderId;
+    private String rideId;
+    private String senderId;
     private String senderRole;   // "DRIVER" or "PASSENGER"
     private String content;
 
