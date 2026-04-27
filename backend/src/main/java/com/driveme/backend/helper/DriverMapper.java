@@ -13,7 +13,7 @@ import java.util.Optional;
 @Component
 public class DriverMapper {
 
-    @Value("${app.public-base-url:http://10.0.2.2:8080}")
+    @Value("${app.public-base-url:http://192.168.1.28:8080}")
     private String publicBaseUrl;
 
     public Driver toEntity(
