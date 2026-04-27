@@ -8,11 +8,13 @@ import com.driveme.backend.dto.MatchingStatusDTO;
 import com.driveme.backend.dto.TripAcceptanceResponseDTO;
 import com.driveme.backend.entity.Driver;
 import com.driveme.backend.entity.DriverTripRejection;
+import com.driveme.backend.entity.Trip;
 import com.driveme.backend.entity.TripRequest;
 import com.driveme.backend.helper.TripRequestMapper;
 import com.driveme.backend.helper.VehicleMapper;
 import com.driveme.backend.repository.DriverRepository;
 import com.driveme.backend.repository.DriverTripRejectionRepository;
+import com.driveme.backend.repository.TripRepository;
 import com.driveme.backend.repository.TripRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,8 +34,10 @@ import java.util.stream.Collectors;
 public class TripMatchingService {
 
     private final TripRequestRepository tripRequestRepository;
+    private final TripRepository tripRepository;
     private final DriverRepository driverRepository;
     private final DriverTripRejectionRepository driverTripRejectionRepository;
+    private final TripService tripService;
 
     /**
      * Get available trip requests for a driver based on location and radii.
@@ -93,20 +97,23 @@ public class TripMatchingService {
                 .tripId(tripId)
                 .status(tripRequest.getStatus());
 
-        // If matched, include driver info
+        // If matched, include driver info and the Trip entity id.
         if (tripRequest.getStatus() == RequestStatus.MATCHED && tripRequest.getMatchedDriver() != null) {
             Driver driver = tripRequest.getMatchedDriver();
-            // Until live driver telemetry is added, expose a stable ETA based on trip distance.
             int etaMinutes = Math.max(1, (int) Math.round(tripRequest.getDistanceKm()));
             MatchingStatusDTO.DriverInfoDTO driverInfo = MatchingStatusDTO.DriverInfoDTO.builder()
                     .id(driver.getId())
                     .fullName(driver.getFullName())
-                    .avgRating(driver.getAvgRating())
-                .etaMinutes(etaMinutes)
+                    .avgRating(driver.getAvgRating() != null ? driver.getAvgRating() : 0.0)
+                    .etaMinutes(etaMinutes)
                     .vehicleDescription(driver.getVehicleDescription())
                     .acceptsPets(driver.isAcceptsPets())
                     .build();
             builder.matchedDriver(driverInfo);
+
+            // Include the Trip entity id so the passenger client can poll trip status directly.
+            tripRepository.findByTripRequestId(tripRequest.getId())
+                    .ifPresent(trip -> builder.tripEntityId(trip.getId()));
         }
 
         // For now, set counters to sensible defaults
@@ -148,9 +155,15 @@ public class TripMatchingService {
         tripRequest.markMatched(driver);
         TripRequest savedTrip = tripRequestRepository.save(tripRequest);
 
+        // Create the confirmed Trip record within the same transaction so both
+        // writes are atomic. The Trip carries the binding ride contract from
+        // here on — the TripRequest becomes an immutable historical artefact.
+        Trip trip = tripService.createFromAcceptedRequest(savedTrip, driver);
+
         // Build response
         return TripAcceptanceResponseDTO.builder()
                 .tripId(tripId)
+                .tripEntityId(trip.getId())
                 .message("Trip accepted successfully")
                 .success(true)
                 .tripDetails(TripRequestMapper.toDTO(savedTrip))
@@ -158,7 +171,7 @@ public class TripMatchingService {
                         .id(driver.getId())
                         .fullName(driver.getFullName())
                         .phoneNumber(driver.getPhoneNumber())
-                        .avgRating(driver.getAvgRating())
+                        .avgRating(driver.getAvgRating() != null ? driver.getAvgRating() : 0.0)
                         .build())
                 .build();
     }
@@ -215,10 +228,18 @@ public class TripMatchingService {
         // Estimate time: assume 60 km/h average speed
         long estimatedMinutes = Math.round((trip.getDistanceKm() / 60.0) * 60);
 
+        double passengerRating = 0.0;
+        if (trip.getPassenger() != null && trip.getPassenger().getAvgRating() != null) {
+            passengerRating = trip.getPassenger().getAvgRating();
+        }
+
         return AvailableTripRequestDTO.builder()
                 .tripId(trip.getId())
+                .requestedTime(trip.getRequestedTime() != null
+                        ? trip.getRequestedTime()
+                        : trip.getCreatedAt())
                 .passengerName(trip.getPassenger().getFullName())
-                .passengerRating(0.0) // TODO: Calculate from passenger ratings
+                .passengerRating(passengerRating)
                 .passengerTripCount(0) // TODO: Count passenger's completed trips
                 .withPet(trip.isWithPet())
                 .pickup(TripRequestMapper.toLocationDTO(trip.getPickup()))

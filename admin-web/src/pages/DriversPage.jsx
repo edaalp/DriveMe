@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api, { hasDocumentUrl, openDocumentUrl } from "../api";
+import api, { hasDocumentUrl } from "../api";
 
 const STATUSES = ["ALL", "PENDING", "VERIFIED", "REJECTED"];
 
@@ -9,6 +9,16 @@ export default function DriversPage() {
   const [filter, setFilter] = useState("PENDING");
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const openDocBlob = async (driverId, endpoint) => {
+    try {
+      const res = await api.get(`/admin/drivers/${driverId}/document/${endpoint}`, { responseType: "blob" });
+      const blob = new Blob([res.data], { type: res.headers["content-type"] });
+      window.open(URL.createObjectURL(blob), "_blank");
+    } catch {
+      alert("Document not available");
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -78,7 +88,7 @@ export default function DriversPage() {
                           ? "Open license document"
                           : "No license file"
                       }
-                      onClick={() => openDocumentUrl(d.driverLicenseDocumentUrl)}
+                      onClick={() => openDocBlob(d.id, "license")}
                     >
                       PDF
                     </button>
@@ -93,9 +103,7 @@ export default function DriversPage() {
                           ? "Open criminal record"
                           : "No criminal record file"
                       }
-                      onClick={() =>
-                        openDocumentUrl(d.criminalRecordDocumentUrl)
-                      }
+                      onClick={() => openDocBlob(d.id, "criminal-record")}
                     >
                       PDF
                     </button>

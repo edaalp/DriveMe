@@ -17,6 +17,13 @@ import java.util.UUID;
 public class TripAcceptanceResponseDTO {
 
     private UUID tripId;
+
+    /**
+     * ID of the freshly-created {@code Trip} entity spawned from this acceptance.
+     * Use this to hit {@code /api/trips/{id}} for the confirmed ride view.
+     */
+    private UUID tripEntityId;
+
     private String message;
     private boolean success;
 

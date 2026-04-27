@@ -1,34 +1,46 @@
 spring:
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
+    # Default to "dev,local" so application-local.yaml (gitignored, contains
+    # SMTP credentials & MAIL_ENABLED=true) is picked up automatically during
+    # local development. CI / prod must override via SPRING_PROFILES_ACTIVE.
+    active: ${SPRING_PROFILES_ACTIVE:dev,local}
   application:
     name: driveme-backend
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 15MB
-  
+
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://127.0.0.1:5433/driveme}
-    username: ${SPRING_DATASOURCE_USERNAME:driveme}
-    password: ${SPRING_DATASOURCE_PASSWORD:driveme123}
+    # `prepareThreshold=0` disables server-side prepared statements. Required
+    # when pointing at Neon's pgbouncer-style pooler — otherwise Hibernate's
+    # SchemaMigrator can hit "cached plan must not change result type" after
+    # a Flyway migration that alters tables it introspected earlier in the
+    # same pooled connection.
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://ep-aged-star-aldavdxb-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&prepareThreshold=0}
+    username: ${SPRING_DATASOURCE_USERNAME:neondb_owner}
+    password: ${SPRING_DATASOURCE_PASSWORD:npg_DCGja3Q8Etuy}
     driver-class-name: org.postgresql.Driver
-  
+
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      # Flyway is the source of truth for schema. `validate` just checks that
+      # all mapped columns/tables exist at boot; `update` would double-manage
+      # the schema and reliably triggers Postgres "cached plan" errors when
+      # combined with a pooled connection.
+      ddl-auto: validate
+      show-sql: true
     properties:
       hibernate:
         format_sql: true
-  
+
   flyway:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
-    url: ${SPRING_FLYWAY_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://127.0.0.1:5433/driveme}}
-    user: ${SPRING_FLYWAY_USER:${SPRING_DATASOURCE_USERNAME:driveme}}
-    password: ${SPRING_FLYWAY_PASSWORD:${SPRING_DATASOURCE_PASSWORD:driveme123}}
+    url: ${SPRING_FLYWAY_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://ep-aged-star-aldavdxb-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require}}
+    user: ${SPRING_FLYWAY_USER:${SPRING_DATASOURCE_USERNAME:neondb_owner}}
+    password: ${SPRING_FLYWAY_PASSWORD:${SPRING_DATASOURCE_PASSWORD:npg_DCGja3Q8Etuy}}
     validate-on-migrate: false
     repair-on-migrate: true
 
@@ -61,7 +73,7 @@ app:
   mail:
     # Set to true to send real OTP emails via SMTP.
     # When false the OTP is only logged and returned in the API response (dev mode).
-    enabled: ${MAIL_ENABLED:false}
+    enabled: ${MAIL_ENABLED:true}
     # "From" address shown to recipients.
     from: ${MAIL_FROM:noreply@driveme.com}
 
@@ -69,3 +81,8 @@ logging:
   level:
     root: INFO
     com.driveme.backend: INFO
+
+management:
+  health:
+    mail:
+      enabled: false
