@@ -3,11 +3,13 @@ package com.driveme.backend.dto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @Builder
 public class MessageDTO {
-    private String rideId;
-    private String senderId;
+    private UUID rideId;
+    private UUID senderId;
     private String senderRole;
     private String content;
 }

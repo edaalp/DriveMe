@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 public class ChatController {
@@ -42,7 +43,7 @@ public class ChatController {
     // REST endpoint to load chat history on page open
     @GetMapping("/api/messages/{rideId}")
     @ResponseBody
-    public List<Message> getHistory(@PathVariable String rideId) {
+    public List<Message> getHistory(@PathVariable UUID rideId) {
         return messageRepo.findByRideIdOrderBySentAtAsc(rideId);
     }
 
