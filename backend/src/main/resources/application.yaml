@@ -61,6 +61,13 @@ spring:
             enable: true
             required: true
 
+server:
+  # For emulator-only development we bind to localhost by default so the
+  # backend is not reachable from other devices on the LAN. The Android
+  # emulator reaches the host via 10.0.2.2 which maps to the host loopback.
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  port: ${SERVER_PORT:8080}
+
 admin:
   signup-secret: ${ADMIN_SIGNUP_SECRET:driveme-admin-secret-2026}
 
@@ -68,7 +75,10 @@ app:
   upload:
     # Writable folder for signup uploads; served at /uploads/** (see WebMvcUploadConfig).
     dir: ${APP_UPLOAD_DIR:src/main/resources/static/uploads}
-  # Public origin for absolute document URLs in JSON (no trailing slash). Default targets Android emulator loopback; admin/browser on same machine: APP_PUBLIC_BASE_URL=http://localhost:8080
+  # Public origin for absolute document URLs in JSON (no trailing slash).
+  # Default targets the Android emulator loopback so colleagues using the emulator
+  # can hit the backend without extra configuration. Override via
+  # APP_PUBLIC_BASE_URL when running against a phone (e.g. http://192.168.1.5:8080).
   public-base-url: ${APP_PUBLIC_BASE_URL:http://10.0.2.2:8080}
   mail:
     # Set to true to send real OTP emails via SMTP.
@@ -88,28 +98,71 @@ management:
       enabled: false
 
 
-# Pricing configuration
+# ============================================================
+# PRICING CONFIGURATION
+# Ankara Taxi Official Tariff - Effective 1 March 2026
+# Source: Ankara Municipality
+# ============================================================
 pricing:
-  # Ankara Taxi Tariff 2026 (midpoint values — override via env vars for exact tariff)
-  taxiOpeningFee: 55.0           # TRY  (official range: 45–65)
-  taxiPerKmRate: 36.0            # TRY/km  (official range: 32–40)
-  taxiPerMinuteRate: 7.0         # TRY/min waiting
-  taxiMinFare: 175.0             # TRY  indi-bindi minimum (official range: 150–200)
+  # === ANKARA TAXI TARIFF (MARCH 2026) ===
+  taxiMinFare: 200.0             # Bindi-İndi ücreti (TL)
+  taxiOpeningFee: 65.0           # Açılış ücreti (TL)
+  taxiPerKmRate: 40.0            # Kilometre ücreti (TL/km)
+  taxiHourlyRate: 420.0          # Saat ücreti (TL/hour)
+  taxiPerMinuteRate: 7.0         # Birim zaman ücreti (TL/min)
+  taxiPer100mRate: 4.0           # Birim mesafe ücreti (TL/100m)
 
-  servicePercentage: 0.15        # 15% of total taxi cost (both legs)
+  # === DRIVER COMPENSATION ===
+  # Factor for compensating driver's return trip
+  # 1.0 = full return trip, 0.7 = 70% of forward trip
+  driverReturnFactor: ${PRICING_DRIVER_RETURN_FACTOR:0.7}
 
+  # === SERVICE FEE ===
+  servicePercentage: ${PRICING_SERVICE_PERCENTAGE:0.15}  # 15%
+
+  # === PRICE RANGE ===
   minPricePercentage: 0.9
   maxPricePercentage: 1.1
   currency: TRY
-  maxSurgeMultiplier: 3.0
-  useGoogleMaps: false
-  googleMapsApiKey: ${GOOGLE_MAPS_API_KEY:}
 
+  # === TIME MULTIPLIERS ===
   rushHourStartMorning: 7
   rushHourEndMorning: 10
   rushHourStartEvening: 17
   rushHourEndEvening: 20
-  rushHourMultiplier: 1.2
+  rushHourMultiplier: ${PRICING_RUSH_HOUR_MULTIPLIER:1.25}
   nightTimeStart: 22
   nightTimeEnd: 6
-  nightTimeMultiplier: 1.1
+  nightTimeMultiplier: ${PRICING_NIGHT_TIME_MULTIPLIER:1.15}
+  weekendMultiplier: ${PRICING_WEEKEND_MULTIPLIER:1.1}
+
+  # === SURGE/DEMAND MULTIPLIERS ===
+  maxSurgeMultiplier: 3.0
+  minSurgeMultiplier: 1.0
+  surgeStepThreshold: 0.2        # 20% excess demand triggers surge step
+  surgeStepIncrement: 0.25       # Each step adds 0.25 to multiplier
+
+  # === WEATHER MULTIPLIERS ===
+  lightRainMultiplier: 1.1
+  heavyRainMultiplier: 1.25
+  snowMultiplier: 1.35
+  extremeHeatMultiplier: 1.1     # > 35°C
+  extremeColdMultiplier: 1.15    # < 0°C
+
+  # === TRAFFIC MULTIPLIERS ===
+  moderateTrafficMultiplier: 1.1
+  heavyTrafficMultiplier: 1.25
+  severeTrafficMultiplier: 1.4
+
+  # === SPECIAL LOCATIONS ===
+  popularDestinationReturnFactor: 0.3
+
+  # === GOOGLE MAPS API ===
+  useGoogleMaps: ${USE_GOOGLE_MAPS:true}
+  googleMapsApiKey: ${GOOGLE_MAPS_API_KEY:AIzaSyCX2EO4Hlvmz14vLCgTat3oeEm18iBYVSQ}
+  useTrafficData: ${USE_TRAFFIC_DATA:true}
+
+  # === WEATHER API (OpenWeatherMap) ===
+  useWeatherApi: ${USE_WEATHER_API:true}
+  weatherApiKey: ${WEATHER_API_KEY:2eb975124fd025beedc70308273d8ac3}
+  weatherApiUrl: https://api.openweathermap.org/data/2.5/weather

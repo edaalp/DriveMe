@@ -44,6 +44,14 @@ public class TripPricingController {
                     .currency(pricingResult.getCurrency())
                     .distanceKm(pricingResult.getDistanceKm())
                     .durationMinutes(pricingResult.getDurationMinutes())
+                    .timeMultiplier(pricingResult.getTimeMultiplier())
+                    .surgeMultiplier(pricingResult.getSurgeMultiplier())
+                    .weatherMultiplier(pricingResult.getWeatherMultiplier())
+                    .trafficMultiplier(pricingResult.getTrafficMultiplier())
+                    .combinedMultiplier(pricingResult.getCombinedMultiplier())
+                    .serviceFee(pricingResult.getServiceFee())
+                    .returnFactor(pricingResult.getReturnFactor())
+                    .popularDestinationApplied(pricingResult.isPopularDestinationApplied())
                     .build();
 
             log.info("Price preview calculated: {} - {} TRY",

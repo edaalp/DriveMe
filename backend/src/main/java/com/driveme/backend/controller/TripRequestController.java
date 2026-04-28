@@ -6,6 +6,7 @@ import com.driveme.backend.dto.*;
 import com.driveme.backend.service.TripRequestService;
 import com.driveme.backend.service.TripMatchingService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

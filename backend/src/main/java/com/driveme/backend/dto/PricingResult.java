@@ -46,6 +46,31 @@ public class PricingResult {
     private double weatherMultiplier;
 
     /**
+     * Traffic-based multiplier
+     */
+    private double trafficMultiplier;
+
+    /**
+     * Combined multiplier = time * surge * weather * traffic
+     */
+    private double combinedMultiplier;
+
+    /**
+     * Applied return compensation factor
+     */
+    private double returnFactor;
+
+    /**
+     * Service fee amount in currency units
+     */
+    private double serviceFee;
+
+    /**
+     * Indicates whether popular-destination return factor was applied
+     */
+    private boolean popularDestinationApplied;
+
+    /**
      * Final base price after all multipliers
      */
     private double finalBasePrice;

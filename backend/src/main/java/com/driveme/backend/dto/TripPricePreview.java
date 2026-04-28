@@ -32,5 +32,29 @@ public class TripPricePreview {
     // Optional: Can add extra fields that Flutter may use in the future
     @JsonProperty("durationMinutes")
     private Integer durationMinutes;
+
+    @JsonProperty("timeMultiplier")
+    private Double timeMultiplier;
+
+    @JsonProperty("surgeMultiplier")
+    private Double surgeMultiplier;
+
+    @JsonProperty("weatherMultiplier")
+    private Double weatherMultiplier;
+
+    @JsonProperty("trafficMultiplier")
+    private Double trafficMultiplier;
+
+    @JsonProperty("combinedMultiplier")
+    private Double combinedMultiplier;
+
+    @JsonProperty("serviceFee")
+    private Double serviceFee;
+
+    @JsonProperty("returnFactor")
+    private Double returnFactor;
+
+    @JsonProperty("popularDestinationApplied")
+    private Boolean popularDestinationApplied;
 }
 

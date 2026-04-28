@@ -22,8 +22,8 @@ public class PassengerMapper {
 
     /**
      * Public origin used to build absolute, browser-friendly download URLs
-     * (e.g. {@code http://10.0.2.2:8080/api/passengers/{id}/document/...}).
-     * Defaults to the Android emulator loopback address; override via the
+     * (e.g. {@code http://192.168.1.5:8080/api/passengers/{id}/document/...}).
+     * Defaults to the LAN testing host; override via the
      * {@code APP_PUBLIC_BASE_URL} environment variable when running against
      * a different host (e.g. {@code http://localhost:8080} for the admin web).
      */
