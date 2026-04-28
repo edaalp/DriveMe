@@ -1,5 +1,7 @@
 package com.driveme.backend.controller;
 
+import com.driveme.backend.dto.CreateTripRequestRequest;
+import com.driveme.backend.dto.TripRequestDTO;
 import com.driveme.backend.dto.*;
 import com.driveme.backend.service.TripRequestService;
 import com.driveme.backend.service.TripMatchingService;
@@ -82,27 +84,6 @@ public class TripRequestController {
         return ResponseEntity.ok(cancelledRequest);
     }
 
-    /**
-     * Calculate price range for a trip (preview before creating request).
-     * POST /api/trip-requests/calculate-price
-     */
-    @PostMapping("/calculate-price")
-    public ResponseEntity<PriceRangeDTO> calculatePrice(
-            @Valid @RequestBody CalculatePriceRequest request) {
-        PriceRangeDTO priceRange = tripRequestService.calculatePriceRange(request.getPickup(), request.getDestination());
-        return ResponseEntity.ok(priceRange);
-    }
-
-    /**
-     * Calculate price range by distance.
-     * GET /api/trip-requests/calculate-price?distance=14
-     */
-    @GetMapping("/calculate-price")
-    public ResponseEntity<PriceRangeDTO> calculatePriceByDistance(
-            @RequestParam double distance) {
-        PriceRangeDTO priceRange = tripRequestService.calculatePriceRangeByDistance(distance);
-        return ResponseEntity.ok(priceRange);
-    }
 
     /**
      * Get matching status for a trip request (passenger view).
