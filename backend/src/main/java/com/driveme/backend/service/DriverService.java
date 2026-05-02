@@ -1,6 +1,7 @@
 package com.driveme.backend.service;
 
 import com.driveme.backend.common.VerificationStatus;
+import com.driveme.backend.dto.DriverMePatchRequest;
 import com.driveme.backend.dto.DriverResponse;
 import com.driveme.backend.dto.DriverSignUpRequest;
 import com.driveme.backend.entity.Driver;
@@ -174,5 +175,17 @@ public class DriverService {
     public Driver getDriverEntityById(UUID driverId) {
         return driverRepository.findById(driverId)
                 .orElseThrow(() -> new IllegalArgumentException("Driver not found with id: " + driverId));
+    }
+
+    /**
+     * Partial update for the authenticated driver (e.g. accepts pets preference).
+     */
+    @Transactional
+    public DriverResponse patchCurrentDriver(UUID driverId, DriverMePatchRequest request) {
+        Driver driver = getDriverEntityById(driverId);
+        if (request.getAcceptsPets() != null) {
+            driver.setAcceptsPets(request.getAcceptsPets());
+        }
+        return driverMapper.toResponse(driverRepository.save(driver));
     }
 }

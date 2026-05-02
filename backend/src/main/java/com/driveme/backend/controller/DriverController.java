@@ -1,5 +1,6 @@
 package com.driveme.backend.controller;
 
+import com.driveme.backend.dto.DriverMePatchRequest;
 import com.driveme.backend.dto.DriverResponse;
 import com.driveme.backend.dto.DriverSignUpRequest;
 import com.driveme.backend.entity.Driver;
@@ -85,6 +86,37 @@ public class DriverController {
             UUID id = UUID.fromString(authentication.getPrincipal().toString());
             Driver driver = driverService.getDriverEntityById(id);
             return ResponseEntity.ok(driverMapper.toResponse(driver));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    /**
+     * Partial update for the current driver (e.g. {@code acceptsPets}).
+     */
+    @PatchMapping("/me")
+    public ResponseEntity<?> patchCurrentDriver(
+            Authentication authentication,
+            @RequestBody DriverMePatchRequest request) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        boolean isDriver = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ROLE_DRIVER"::equals);
+        if (!isDriver) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ErrorResponse("Only drivers can access this resource"));
+        }
+        if (request.getAcceptsPets() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse("No updatable fields provided"));
+        }
+        try {
+            UUID id = UUID.fromString(authentication.getPrincipal().toString());
+            DriverResponse updated = driverService.patchCurrentDriver(id, request);
+            return ResponseEntity.ok(updated);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse(e.getMessage()));

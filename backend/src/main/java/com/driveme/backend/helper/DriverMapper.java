@@ -67,6 +67,7 @@ public class DriverMapper {
         response.setLicenseNumber(driver.getLicenseNumber());
         response.setVehicleDescription(driver.getVehicleDescription());
         response.setAvailable(driver.isAvailable());
+        response.setAcceptsPets(driver.isAcceptsPets());
         response.setTckNo(driver.getTckNo());
         response.setDriverLicenseNumber(driver.getDriverLicenseNumber());
         response.setLicenseIssueDate(driver.getLicenseIssueDate());

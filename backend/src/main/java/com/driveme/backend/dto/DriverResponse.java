@@ -25,6 +25,8 @@ public class DriverResponse {
     /** Free-text vehicle description when the driver has registered vehicle details. */
     private String vehicleDescription;
     private boolean available;
+    /** Whether this driver accepts trip requests that include a pet. */
+    private boolean acceptsPets;
     private long tckNo;
     private String driverLicenseNumber;
     private Date licenseIssueDate;
