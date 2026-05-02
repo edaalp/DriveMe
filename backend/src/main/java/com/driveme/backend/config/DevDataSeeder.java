@@ -1,11 +1,13 @@
 package com.driveme.backend.config;
 
 import com.driveme.backend.common.TransmissionType;
+import com.driveme.backend.common.VehicleDocumentType;
 import com.driveme.backend.common.VerificationStatus;
 import com.driveme.backend.entity.Admin;
 import com.driveme.backend.entity.Driver;
 import com.driveme.backend.entity.Passenger;
 import com.driveme.backend.entity.Vehicle;
+import com.driveme.backend.entity.VehicleDocument;
 import com.driveme.backend.repository.AdminRepository;
 import com.driveme.backend.repository.DriverRepository;
 import com.driveme.backend.repository.PassengerRepository;
@@ -152,8 +154,7 @@ public class DevDataSeeder implements CommandLineRunner {
         v1.setTransmission(TransmissionType.AUTOMATIC);
         v1.setStatus(VerificationStatus.PENDING);
         v1.setPassenger(p1);
-        v1.setDocumentFile(fakePdf);
-        v1.setDocumentFileName("toyota_corolla_ruhsat.pdf");
+        attachVehicleDoc(v1, "toyota_corolla_ruhsat.pdf", VehicleDocumentType.RUHSAT_FRONT, fakePdf);
         vehicleRepository.save(v1);
 
         // Vehicle 2 - VERIFIED with document
@@ -165,8 +166,7 @@ public class DevDataSeeder implements CommandLineRunner {
         v2.setTransmission(TransmissionType.AUTOMATIC);
         v2.setStatus(VerificationStatus.VERIFIED);
         v2.setPassenger(p2);
-        v2.setDocumentFile(fakePdf);
-        v2.setDocumentFileName("honda_civic_registration.pdf");
+        attachVehicleDoc(v2, "honda_civic_registration.pdf", VehicleDocumentType.RUHSAT_FRONT, fakePdf);
         vehicleRepository.save(v2);
 
         // Vehicle 3 - PENDING without document
@@ -189,8 +189,7 @@ public class DevDataSeeder implements CommandLineRunner {
         v4.setTransmission(TransmissionType.AUTOMATIC);
         v4.setStatus(VerificationStatus.VERIFIED);
         v4.setPassenger(p2);
-        v4.setDocumentFile(fakePdf);
-        v4.setDocumentFileName("bmw_320i_ruhsat.pdf");
+        attachVehicleDoc(v4, "bmw_320i_ruhsat.pdf", VehicleDocumentType.RUHSAT_FRONT, fakePdf);
         vehicleRepository.save(v4);
 
         log.info("Seeded 4 passengers (1 pending, 1 verified, 1 pending, 1 rejected) and 4 vehicles");
@@ -292,6 +291,19 @@ public class DevDataSeeder implements CommandLineRunner {
         driverRepository.save(d4);
 
         log.info("Seeded 4 drivers (3 pending, 1 verified)");
+    }
+
+    private static void attachVehicleDoc(
+            Vehicle vehicle,
+            String fileName,
+            VehicleDocumentType type,
+            byte[] content) {
+        VehicleDocument d = new VehicleDocument();
+        d.setVehicle(vehicle);
+        d.setFileName(fileName);
+        d.setDocumentType(type);
+        d.setFileContent(content);
+        vehicle.getDocuments().add(d);
     }
 
     /**

@@ -2,8 +2,13 @@ package com.driveme.backend.helper;
 
 import com.driveme.backend.dto.CreateVehicleRequest;
 import com.driveme.backend.dto.VehicleDTO;
+import com.driveme.backend.dto.VehicleDocumentDTO;
 import com.driveme.backend.entity.Passenger;
 import com.driveme.backend.entity.Vehicle;
+import com.driveme.backend.entity.VehicleDocument;
+
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Mapper for Vehicle entity and DTOs.
@@ -22,6 +27,12 @@ public final class VehicleMapper {
             return null;
         }
 
+        List<VehicleDocumentDTO> docs = vehicle.getDocuments() == null ? List.of()
+                : vehicle.getDocuments().stream()
+                .sorted(Comparator.comparing(VehicleDocument::getDocumentType))
+                .map(VehicleMapper::toDocumentDTO)
+                .toList();
+
         return VehicleDTO.builder()
                 .id(vehicle.getId())
                 .plateNumber(vehicle.getPlateNumber())
@@ -31,14 +42,22 @@ public final class VehicleMapper {
                 .transmission(vehicle.getTransmission())
                 .status(vehicle.getStatus())
                 .rejectionReason(vehicle.getRejectionReason())
-                .hasDocument(vehicle.getDocumentFile() != null && vehicle.getDocumentFile().length > 0)
-                .documentFileName(vehicle.getDocumentFileName())
+                .hasDocument(!docs.isEmpty())
+                .documents(docs)
                 .passengerId(vehicle.getPassenger() != null ? vehicle.getPassenger().getId() : null)
                 .ownerFullName(vehicle.getPassenger() != null ? vehicle.getPassenger().getFullName() : null)
                 .ownerEmail(vehicle.getPassenger() != null ? vehicle.getPassenger().getEmail() : null)
                 .ownerPhoneNumber(vehicle.getPassenger() != null ? vehicle.getPassenger().getPhoneNumber() : null)
                 .createdAt(vehicle.getCreatedAt())
                 .updatedAt(vehicle.getUpdatedAt())
+                .build();
+    }
+
+    private static VehicleDocumentDTO toDocumentDTO(VehicleDocument d) {
+        return VehicleDocumentDTO.builder()
+                .id(d.getId())
+                .fileName(d.getFileName())
+                .documentType(d.getDocumentType())
                 .build();
     }
 

@@ -3,6 +3,8 @@ package com.driveme.backend.repository;
 import com.driveme.backend.common.VerificationStatus;
 import com.driveme.backend.entity.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -39,5 +41,17 @@ public interface VehicleRepository extends JpaRepository<Vehicle, UUID> {
      * Check if a plate number is already registered.
      */
     boolean existsByPlateNumber(String plateNumber);
+
+    @Query("SELECT DISTINCT v FROM Vehicle v LEFT JOIN FETCH v.documents WHERE v.id = :id")
+    Optional<Vehicle> findByIdWithDocuments(@Param("id") UUID id);
+
+    @Query("SELECT DISTINCT v FROM Vehicle v LEFT JOIN FETCH v.documents WHERE v.passenger.id = :passengerId")
+    List<Vehicle> findByPassengerIdWithDocuments(@Param("passengerId") UUID passengerId);
+
+    @Query("SELECT DISTINCT v FROM Vehicle v LEFT JOIN FETCH v.documents WHERE v.status = :status")
+    List<Vehicle> findByStatusWithDocuments(@Param("status") VerificationStatus status);
+
+    @Query("SELECT DISTINCT v FROM Vehicle v LEFT JOIN FETCH v.documents")
+    List<Vehicle> findAllWithDocuments();
 }
 

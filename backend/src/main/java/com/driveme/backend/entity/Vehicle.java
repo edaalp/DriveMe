@@ -9,6 +9,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Vehicle entity representing a passenger's vehicle.
  */
@@ -43,10 +46,8 @@ public class Vehicle extends BaseEntity {
     @Column(length = 500)
     private String rejectionReason;
 
-    @Lob
-    private byte[] documentFile;
-
-    private String documentFileName;
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VehicleDocument> documents = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "passenger_id", nullable = false)

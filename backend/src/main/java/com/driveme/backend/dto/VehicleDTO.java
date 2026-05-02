@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -27,8 +28,9 @@ public class VehicleDTO {
     private TransmissionType transmission;
     private VerificationStatus status;
     private String rejectionReason;
+    /** True when at least one vehicle document exists (derived). */
     private boolean hasDocument;
-    private String documentFileName;
+    private List<VehicleDocumentDTO> documents;
     private UUID passengerId;
     private String ownerFullName;
     private String ownerEmail;

@@ -24,11 +24,12 @@ spring:
 
   jpa:
     hibernate:
-      # Flyway is the source of truth for schema. `validate` just checks that
-      # all mapped columns/tables exist at boot; `update` would double-manage
-      # the schema and reliably triggers Postgres "cached plan" errors when
-      # combined with a pooled connection.
-      ddl-auto: validate
+      # Flyway is the source of truth for schema. Default `validate` once all
+      # migrations match Neon. TEMPORARY `update`: bridge until V20260502_01
+      # (vehicle_documents) is applied so Hibernate does not fail if Flyway
+      # version order was behind DB history. Revert to `validate` after Neon
+      # shows vehicle_documents and ddl aligns.
+      ddl-auto: update
       show-sql: true
     properties:
       hibernate:

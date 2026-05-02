@@ -9,7 +9,7 @@ import com.driveme.backend.dto.VehicleDTO;
 import com.driveme.backend.dto.VerificationDecisionRequest;
 import com.driveme.backend.entity.Admin;
 import com.driveme.backend.entity.Driver;
-import com.driveme.backend.entity.Vehicle;
+import com.driveme.backend.entity.VehicleDocument;
 import com.driveme.backend.helper.DriverMapper;
 import com.driveme.backend.helper.PassengerMapper;
 import com.driveme.backend.service.AdminService;
@@ -118,22 +118,24 @@ public class AdminController {
         }
     }
 
-    @GetMapping("/vehicles/{id}/document")
-    @Operation(summary = "Download vehicle document", description = "Download the uploaded vehicle document")
-    public ResponseEntity<byte[]> downloadVehicleDocument(@PathVariable UUID id) {
-        Vehicle vehicle = vehicleService.getVehicleEntityById(id);
+    @GetMapping("/vehicles/{vehicleId}/documents/{documentId}")
+    @Operation(summary = "Download vehicle document", description = "Download one uploaded vehicle document or photo")
+    public ResponseEntity<byte[]> downloadVehicleDocument(
+            @PathVariable UUID vehicleId,
+            @PathVariable UUID documentId) {
+        VehicleDocument doc = vehicleService.getDocumentForAdmin(vehicleId, documentId);
 
-        if (vehicle.getDocumentFile() == null || vehicle.getDocumentFile().length == 0) {
+        if (doc.getFileContent() == null || doc.getFileContent().length == 0) {
             return ResponseEntity.notFound().build();
         }
 
-        String contentType = guessContentType(vehicle.getDocumentFileName());
+        String contentType = guessContentType(doc.getFileName());
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"" + vehicle.getDocumentFileName() + "\"")
-                .body(vehicle.getDocumentFile());
+                        "inline; filename=\"" + (doc.getFileName() != null ? doc.getFileName() : "document") + "\"")
+                .body(doc.getFileContent());
     }
 
     // ==================== Driver Verification ====================
@@ -328,6 +330,7 @@ public class AdminController {
         if (lower.endsWith(".pdf")) return MediaType.APPLICATION_PDF_VALUE;
         if (lower.endsWith(".png")) return MediaType.IMAGE_PNG_VALUE;
         if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return MediaType.IMAGE_JPEG_VALUE;
+        if (lower.endsWith(".webp")) return "image/webp";
         return MediaType.APPLICATION_OCTET_STREAM_VALUE;
     }
 }

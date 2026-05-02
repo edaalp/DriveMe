@@ -102,11 +102,14 @@ public class TripMapper {
             return null;
         }
 
-        String photoUrl = switch (user) {
-            case Driver d -> d.getProfilePictureUrl();
-            case Passenger p -> p.getProfilePictureUrl();
-            default -> null;
-        };
+        final String photoUrl;
+        if (user instanceof Driver d) {
+            photoUrl = d.getProfilePictureUrl();
+        } else if (user instanceof Passenger p) {
+            photoUrl = p.getProfilePictureUrl();
+        } else {
+            photoUrl = null;
+        }
 
         return TripDTO.PartyDTO.builder()
                 .id(user.getId())
