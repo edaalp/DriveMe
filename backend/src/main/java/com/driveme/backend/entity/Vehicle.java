@@ -5,6 +5,8 @@ import com.driveme.backend.common.TransmissionType;
 import com.driveme.backend.common.VerificationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -46,8 +48,10 @@ public class Vehicle extends BaseEntity {
     @Column(length = 500)
     private String rejectionReason;
 
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<VehicleDocument> documents = new ArrayList<>();
+    @JdbcTypeCode(SqlTypes.VARBINARY)
+    private byte[] documentFile;
+
+    private String documentFileName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "passenger_id", nullable = false)

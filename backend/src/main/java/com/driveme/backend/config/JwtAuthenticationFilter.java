@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
@@ -80,6 +81,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     log.debug("JWT token validated for user: {} (userId: {})", userEmail, userId);
                 }
             }
+        } catch (ExpiredJwtException e) {
+            log.debug("JWT expired, continuing unauthenticated: {}", e.getMessage());
         } catch (Exception e) {
             log.error("JWT validation failed: {}", e.getMessage());
         }

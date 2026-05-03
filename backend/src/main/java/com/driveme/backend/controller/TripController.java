@@ -24,6 +24,7 @@ import java.util.UUID;
  *   <li>{@code GET /api/trips/driver/me} — driver's trip history</li>
  *   <li>{@code GET /api/trips/passenger/me} — passenger's trip history</li>
  *   <li>{@code PUT /api/trips/{id}/arrived} — driver at pickup</li>
+ *   <li>{@code POST /api/trips/{id}/refresh-boarding-code} — new boarding code while DRIVER_ARRIVED</li>
  *   <li>{@code PUT /api/trips/{id}/start}   — ride underway</li>
  *   <li>{@code PUT /api/trips/{id}/complete} — ride finished</li>
  *   <li>{@code PUT /api/trips/{id}/cancel}   — cancel (either party)</li>
@@ -66,6 +67,15 @@ public class TripController {
     @PutMapping("/{id}/arrived")
     public ResponseEntity<TripDTO> driverArrived(Authentication auth, @PathVariable UUID id) {
         return ResponseEntity.ok(tripService.markArrived(id, callerId(auth)));
+    }
+
+    /**
+     * Passenger or driver requests a fresh 4-digit code (e.g. timeout, typo, stale code).
+     * Only valid while status is DRIVER_ARRIVED.
+     */
+    @PostMapping("/{id}/refresh-boarding-code")
+    public ResponseEntity<TripDTO> refreshBoardingCode(Authentication auth, @PathVariable UUID id) {
+        return ResponseEntity.ok(tripService.refreshBoardingCode(id, callerId(auth)));
     }
 
     @PutMapping("/{id}/start")

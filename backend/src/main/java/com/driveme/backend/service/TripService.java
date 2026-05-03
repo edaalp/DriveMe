@@ -147,6 +147,23 @@ public class TripService {
     }
 
     /**
+     * Issue a new 4-digit boarding code while the passenger is verifying.
+     * Driver or passenger may call this during {@link TripStatus#DRIVER_ARRIVED}.
+     */
+    @Transactional
+    public TripDTO refreshBoardingCode(UUID tripId, UUID callerId) {
+        Trip trip = mustLoadAndAuthorize(tripId, callerId);
+        if (trip.getStatus() != TripStatus.DRIVER_ARRIVED) {
+            throw new IllegalStateException(
+                    "Boarding code can only be refreshed when the driver has arrived at pickup (status DRIVER_ARRIVED).");
+        }
+        trip.setVerificationCode(String.format("%04d", 1000 + new Random().nextInt(9000)));
+        Trip saved = tripRepository.save(trip);
+        log.info("Trip {} boarding code refreshed by {}", saved.getId(), callerId);
+        return tripMapper.toDTO(saved);
+    }
+
+    /**
      * Passenger confirms they are in the car by acknowledging the driver's code.
      * Transitions the trip from DRIVER_ARRIVED → IN_PROGRESS.
      *
