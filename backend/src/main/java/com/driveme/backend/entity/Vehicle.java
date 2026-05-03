@@ -56,5 +56,17 @@ public class Vehicle extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "passenger_id", nullable = false)
     private Passenger passenger;
+  
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VehicleDocument> documents = new ArrayList<>();
+
+    public List<VehicleDocument> getDocuments() {
+        return documents;
+    }
+
+    public void setDocuments(List<VehicleDocument> documents) {
+        this.documents = documents;
+    }
+    
 }
 
