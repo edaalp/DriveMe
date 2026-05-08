@@ -37,6 +37,9 @@ public class DriverResponse {
     private String criminalRecordDocumentUrl;
     /** Profile (selfie) image URL. */
     private String profilePictureUrl;
+    /** Visible account rating shown as stars. New accounts start at 5.0. */
+    private Double avgRating;
+    private Integer ratingCount;
     private VerificationStatus verificationStatus;
     private String rejectionReason;
 }

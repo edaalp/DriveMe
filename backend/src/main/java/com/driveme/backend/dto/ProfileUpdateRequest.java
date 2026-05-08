@@ -5,16 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Partial update for the authenticated driver profile (PATCH /api/drivers/me).
+ * Editable profile fields shared by passenger and driver settings screens.
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DriverMePatchRequest {
+public class ProfileUpdateRequest {
 
     private String fullName;
     private String phoneNumber;
-
-    /** When non-null, updates whether the driver accepts pet trips. */
-    private Boolean acceptsPets;
 }

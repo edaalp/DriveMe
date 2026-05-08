@@ -116,8 +116,8 @@ public class TripMapper {
                 .fullName(user.getFullName())
                 .phoneNumber(user.getPhoneNumber())
                 .profilePictureUrl(toAbsoluteUrl(photoUrl))
-                .avgRating(user.getAvgRating())
-                .ratingCount(user.getRatingCount())
+                .avgRating(user.getAvgRating() != null ? user.getAvgRating() : 5.0)
+                .ratingCount(user.getRatingCount() != null ? user.getRatingCount() : 0)
                 .build();
     }
 

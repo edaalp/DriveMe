@@ -1,0 +1,8 @@
+SPRING_PROFILES_ACTIVE: prod
+SPRING_FLYWAY_VALIDATE_ON_MIGRATE: "false"
+SPRING_FLYWAY_REPAIR_ON_MIGRATE: "true"
+APP_PUBLIC_BASE_URL: https://driveme-backend-408215311526.europe-west1.run.app
+APP_CORS_ALLOWED_ORIGINS: https://driveme-admin-web-408215311526.europe-west1.run.app,http://localhost:5173
+APP_WEBSOCKET_ALLOWED_ORIGIN_PATTERNS: https://driveme-admin-web-408215311526.europe-west1.run.app,http://localhost:5173
+MAIL_ENABLED: "false"
+MAIL_FROM: noreply@driveme.com

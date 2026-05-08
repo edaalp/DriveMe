@@ -3,6 +3,7 @@ package com.driveme.backend.controller;
 import com.driveme.backend.entity.Passenger;
 import com.driveme.backend.helper.PassengerMapper;
 import com.driveme.backend.dto.PassengerDTO;
+import com.driveme.backend.dto.ProfileUpdateRequest;
 import com.driveme.backend.service.PassengerService;
 import com.driveme.backend.auth.PassengerSignUpRequest;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -88,15 +90,8 @@ public class PassengerController {
      */
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentPassenger(Authentication authentication) {
-        if (authentication == null || authentication.getPrincipal() == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        final UUID passengerId;
-        try {
-            passengerId = UUID.fromString(authentication.getPrincipal().toString());
-        } catch (IllegalArgumentException e) {
-            log.warn("Invalid passenger principal in JWT: {}", authentication.getPrincipal());
+        UUID passengerId = authenticatedPassengerId(authentication);
+        if (passengerId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -104,6 +99,26 @@ public class PassengerController {
                 .map(passengerMapper::toDTO)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    /**
+     * Update editable personal information for the current passenger.
+     */
+    @PatchMapping("/me")
+    public ResponseEntity<?> patchCurrentPassenger(
+            Authentication authentication,
+            @RequestBody ProfileUpdateRequest request) {
+        UUID passengerId = authenticatedPassengerId(authentication);
+        if (passengerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            return ResponseEntity.ok(passengerService.updateCurrentPassenger(passengerId, request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(e.getMessage()));
+        }
     }
 
     /**
@@ -176,6 +191,24 @@ public class PassengerController {
         if (lower.endsWith(".png")) return MediaType.IMAGE_PNG_VALUE;
         if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return MediaType.IMAGE_JPEG_VALUE;
         return MediaType.APPLICATION_OCTET_STREAM_VALUE;
+    }
+
+    private UUID authenticatedPassengerId(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        boolean isPassenger = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ROLE_PASSENGER"::equals);
+        if (!isPassenger || authentication.getPrincipal() == null) {
+            return null;
+        }
+        try {
+            return UUID.fromString(authentication.getPrincipal().toString());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid passenger principal in JWT: {}", authentication.getPrincipal());
+            return null;
+        }
     }
 
     private record ErrorResponse(String message) {}

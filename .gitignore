@@ -191,6 +191,10 @@ $RECYCLE.BIN/
 # ===========================
 .env
 .env.local
+.env.production
+.env.*
+!.env.example
+!.env.*.example
 .env.*.local
 *.key
 *.pem

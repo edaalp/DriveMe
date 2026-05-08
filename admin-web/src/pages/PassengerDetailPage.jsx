@@ -1,12 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api, {
-  hasDocumentUrl,
   getPassengerProfilePictureUrl,
   getPassengerTcPhotoFrontUrl,
   getPassengerTcPhotoBackUrl,
-  openDocumentUrl
+  openDocumentUrl,
+  fetchDocumentBlobUrl
 } from "../api";
+
+function useProtectedDocument(url) {
+  const [blobUrl, setBlobUrl] = useState("");
+
+  useEffect(() => {
+    if (!url) return;
+    let cancelled = false;
+    let objectUrl = "";
+
+    fetchDocumentBlobUrl(url)
+      .then((nextUrl) => {
+        if (cancelled) {
+          if (nextUrl) URL.revokeObjectURL(nextUrl);
+          return;
+        }
+        objectUrl = nextUrl;
+        setBlobUrl(nextUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setBlobUrl("");
+      });
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      setBlobUrl("");
+    };
+  }, [url]);
+
+  return blobUrl;
+}
 
 export default function PassengerDetailPage() {
   const { id } = useParams();
@@ -39,8 +70,14 @@ export default function PassengerDetailPage() {
     }
   };
 
-  if (!passenger) return <div className="loading">Loading...</div>;
+  const profileUrl = getPassengerProfilePictureUrl(id);
+  const tcFrontUrl = getPassengerTcPhotoFrontUrl(id);
+  const tcBackUrl = getPassengerTcPhotoBackUrl(id);
+  const profileBlobUrl = useProtectedDocument(profileUrl);
+  const tcFrontBlobUrl = useProtectedDocument(tcFrontUrl);
+  const tcBackBlobUrl = useProtectedDocument(tcBackUrl);
 
+  if (!passenger) return <div className="loading">Loading...</div>;
 
   return (
     <div>
@@ -60,7 +97,7 @@ export default function PassengerDetailPage() {
         <h3 style={{ marginBottom: "0.75rem" }}>Profile photo (selfie)</h3>
         <div className="document-preview" style={{ maxWidth: "320px" }}>
           <img
-            src={getPassengerProfilePictureUrl(id)}
+            src={profileBlobUrl}
             alt="Passenger selfie"
             style={{ width: "100%", borderRadius: "8px", objectFit: "cover" }}
             onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'block'; }}
@@ -71,7 +108,8 @@ export default function PassengerDetailPage() {
           <button
             type="button"
             className="btn btn-primary"
-            onClick={() => openDocumentUrl(getPassengerProfilePictureUrl(id))}
+            disabled={!profileBlobUrl}
+            onClick={() => openDocumentUrl(profileUrl)}
           >
             Open in new tab
           </button>
@@ -101,7 +139,7 @@ export default function PassengerDetailPage() {
         <h3 style={{ marginBottom: "0.75rem" }}>TC Identity Card — Front</h3>
         <div className="document-preview">
           <img
-            src={getPassengerTcPhotoFrontUrl(id)}
+            src={tcFrontBlobUrl}
             alt="TC card front"
             style={{ width: "100%", borderRadius: "8px" }}
             onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'block'; }}
@@ -112,7 +150,8 @@ export default function PassengerDetailPage() {
           <button
             type="button"
             className="btn btn-primary"
-            onClick={() => openDocumentUrl(getPassengerTcPhotoFrontUrl(id))}
+            disabled={!tcFrontBlobUrl}
+            onClick={() => openDocumentUrl(tcFrontUrl)}
           >
             Open in new tab
           </button>
@@ -124,7 +163,7 @@ export default function PassengerDetailPage() {
         <h3 style={{ marginBottom: "0.75rem" }}>TC Identity Card — Back</h3>
         <div className="document-preview">
           <img
-            src={getPassengerTcPhotoBackUrl(id)}
+            src={tcBackBlobUrl}
             alt="TC card back"
             style={{ width: "100%", borderRadius: "8px" }}
             onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'block'; }}
@@ -135,7 +174,8 @@ export default function PassengerDetailPage() {
           <button
             type="button"
             className="btn btn-primary"
-            onClick={() => openDocumentUrl(getPassengerTcPhotoBackUrl(id))}
+            disabled={!tcBackBlobUrl}
+            onClick={() => openDocumentUrl(tcBackUrl)}
           >
             Open in new tab
           </button>

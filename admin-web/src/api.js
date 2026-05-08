@@ -58,15 +58,39 @@ export function resolveAssetUrl(url) {
   return `${API_ORIGIN}/${href}`;
 }
 
-/** Opens absolute or backend-relative document URLs in a new browser tab. */
-export function openDocumentUrl(url) {
-  let href = url;
-  // If it's already a full URL (starts with http), use it directly
-  if (!url.startsWith("http")) {
-    href = resolveAssetUrl(url);
+export function apiPathFromUrl(url) {
+  if (typeof url !== "string" || !url.trim()) return "";
+  const href = resolveAssetUrl(url);
+  try {
+    const parsed = new URL(href);
+    return `${parsed.pathname}${parsed.search}`;
+  } catch (_) {
+    return href.startsWith("/api/") ? href : "";
   }
-  if (!href) return;
-  window.open(href, "_blank", "noopener,noreferrer");
+}
+
+export async function fetchDocumentBlobUrl(url) {
+  const path = apiPathFromUrl(url);
+  if (!path) return "";
+  const apiPath = path.startsWith("/api/") ? path.slice(4) : path;
+  const res = await api.get(apiPath, { responseType: "blob" });
+  const blob = new Blob([res.data], { type: res.headers["content-type"] });
+  return URL.createObjectURL(blob);
+}
+
+/** Opens a protected backend document in a new browser tab using the admin JWT. */
+export async function openDocumentUrl(url) {
+  const tab = window.open("", "_blank", "noopener,noreferrer");
+  const blobUrl = await fetchDocumentBlobUrl(url);
+  if (!blobUrl) {
+    tab?.close();
+    return;
+  }
+  if (tab) {
+    tab.location.href = blobUrl;
+  } else {
+    window.open(blobUrl, "_blank", "noopener,noreferrer");
+  }
 }
 
 export function hasDocumentUrl(url) {

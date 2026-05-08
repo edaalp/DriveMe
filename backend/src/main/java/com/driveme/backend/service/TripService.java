@@ -3,6 +3,7 @@ package com.driveme.backend.service;
 import com.driveme.backend.common.Money;
 import com.driveme.backend.common.PaymentMethod;
 import com.driveme.backend.common.PaymentStatus;
+import com.driveme.backend.common.PenaltyType;
 import com.driveme.backend.common.TripStatus;
 import com.driveme.backend.dto.CompleteTripRequest;
 import com.driveme.backend.dto.DriverLocationPing;
@@ -11,11 +12,13 @@ import com.driveme.backend.dto.TripDTO;
 import com.driveme.backend.entity.BaseUser;
 import com.driveme.backend.entity.Driver;
 import com.driveme.backend.entity.Passenger;
+import com.driveme.backend.entity.Penalty;
 import com.driveme.backend.entity.Trip;
 import com.driveme.backend.entity.TripRequest;
 import com.driveme.backend.helper.TripMapper;
 import com.driveme.backend.repository.DriverRepository;
 import com.driveme.backend.repository.PassengerRepository;
+import com.driveme.backend.repository.PenaltyRepository;
 import com.driveme.backend.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,9 +51,17 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TripService {
 
+    private static final BigDecimal CANCELLATION_PENALTY_AMOUNT = BigDecimal.valueOf(25);
+    private static final double CANCELLATION_RATING_DROP = 0.25;
+    private static final double NO_SHOW_RATING_DROP = 0.50;
+    private static final double DEFAULT_ACCOUNT_RATING = 5.0;
+    private static final double MIN_ACCOUNT_RATING = 1.0;
+    private static final double MAX_ACCOUNT_RATING = 5.0;
+
     private final TripRepository          tripRepository;
     private final DriverRepository        driverRepository;
     private final PassengerRepository     passengerRepository;
+    private final PenaltyRepository       penaltyRepository;
     private final TripMapper              tripMapper;
 
     // ── Creation ─────────────────────────────────────────────────────────────
@@ -218,15 +229,22 @@ public class TripService {
         Trip.CancelledBy party = trip.getDriver().getId().equals(callerId)
                 ? Trip.CancelledBy.DRIVER
                 : Trip.CancelledBy.PASSENGER;
+        boolean chargePenalty = shouldChargePenalty(party, trip);
 
         trip.cancelBy(party, reason);
 
-        // Penalty placeholder — real rules will live here once finance defines them.
-        // For now we apply a flat 25 TRY fee when the cancelling party is the one
-        // that accepted the ride (driver) or had already been picked up by the
-        // driver (passenger after DRIVER_ARRIVED).
-        if (shouldChargePenalty(party, trip)) {
-            trip.setPenaltyAmount(Money.ofTRY(BigDecimal.valueOf(25)));
+        // Charge a flat fee to the side that caused a costly cancellation.
+        if (chargePenalty) {
+            trip.setPenaltyAmount(Money.ofTRY(CANCELLATION_PENALTY_AMOUNT));
+            BaseUser penalizedUser = party == Trip.CancelledBy.DRIVER
+                    ? trip.getDriver()
+                    : trip.getPassenger();
+            applyPenalty(
+                    penalizedUser,
+                    trip,
+                    PenaltyType.CANCELLATION,
+                    "Trip cancellation penalty",
+                    CANCELLATION_RATING_DROP);
         }
 
         return tripMapper.toDTO(tripRepository.save(trip));
@@ -237,7 +255,13 @@ public class TripService {
         Trip trip = mustLoadDriverTrip(tripId, driverId);
         trip.markNoShow();
         // No-show still bills the passenger a nominal fee since the driver showed up.
-        trip.setPenaltyAmount(Money.ofTRY(BigDecimal.valueOf(25)));
+        trip.setPenaltyAmount(Money.ofTRY(CANCELLATION_PENALTY_AMOUNT));
+        applyPenalty(
+                trip.getPassenger(),
+                trip,
+                PenaltyType.NO_SHOW,
+                "Passenger did not show up at pickup",
+                NO_SHOW_RATING_DROP);
         return tripMapper.toDTO(tripRepository.save(trip));
     }
 
@@ -353,7 +377,7 @@ public class TripService {
     private void applyRatingAggregate(BaseUser user, int rating) {
         if (user == null) return;
 
-        double oldAvg  = user.getAvgRating()   != null ? user.getAvgRating()   : 0.0;
+        double oldAvg  = user.getAvgRating()   != null ? user.getAvgRating()   : DEFAULT_ACCOUNT_RATING;
         int   oldCount = user.getRatingCount() != null ? user.getRatingCount() : 0;
 
         int newCount = oldCount + 1;
@@ -372,10 +396,43 @@ public class TripService {
     private static boolean shouldChargePenalty(Trip.CancelledBy party, Trip trip) {
         // Driver cancelling: always charged.
         if (party == Trip.CancelledBy.DRIVER) return true;
-        // Passenger cancelling: only if the driver had already started heading
-        // or arrived. Passenger cancelling immediately after acceptance is free.
-        return trip.getStatus() == TripStatus.CANCELLED_BY_PASSENGER
+        // Passenger cancelling: only after the driver has arrived.
+        // Passenger cancelling immediately after acceptance is free.
+        return trip.getStatus() == TripStatus.DRIVER_ARRIVED
                 && trip.getDriverArrivedAt() != null;
+    }
+
+    private void applyPenalty(
+            BaseUser user,
+            Trip trip,
+            PenaltyType type,
+            String reason,
+            double ratingDrop) {
+        if (user == null || trip == null) {
+            return;
+        }
+
+        Penalty penalty = new Penalty();
+        penalty.setUserId(user.getId());
+        penalty.setType(type);
+        penalty.setPenaltyAmount(Money.ofTRY(CANCELLATION_PENALTY_AMOUNT));
+        penalty.setReason(reason);
+        penalty.setTripId(trip.getId());
+        penalty.setPaid(false);
+        penaltyRepository.save(penalty);
+
+        double current = user.getAvgRating() != null ? user.getAvgRating() : DEFAULT_ACCOUNT_RATING;
+        double next = Math.max(MIN_ACCOUNT_RATING, Math.min(MAX_ACCOUNT_RATING, current - ratingDrop));
+        int oldCount = user.getRatingCount() != null ? user.getRatingCount() : 0;
+
+        user.setAvgRating(next);
+        user.setRatingCount(oldCount + 1);
+
+        if (user instanceof Driver d) {
+            driverRepository.save(d);
+        } else if (user instanceof Passenger p) {
+            passengerRepository.save(p);
+        }
     }
 
     private static int estimateMinutes(double distanceKm) {

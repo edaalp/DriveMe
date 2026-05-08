@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -92,6 +93,17 @@ public class PenaltyController {
         return ResponseEntity.ok(penalties);
     }
 
+    @GetMapping("/me")
+    @Operation(summary = "Get my penalties", description = "Retrieves all penalties for the authenticated driver or passenger")
+    public ResponseEntity<List<PenaltyResponse>> getMyPenalties(Authentication auth) {
+        UUID userId = callerId(auth);
+        List<PenaltyResponse> penalties = penaltyService.getPenaltiesByUserId(userId)
+                .stream()
+                .map(penaltyMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(penalties);
+    }
+
     /**
      * Gets unpaid penalties for a user.
      *
@@ -102,6 +114,17 @@ public class PenaltyController {
     @Operation(summary = "Get unpaid penalties", description = "Retrieves all unpaid penalties for a user")
     public ResponseEntity<List<PenaltyResponse>> getUnpaidPenalties(
             @Parameter(description = "User ID") @PathVariable UUID userId) {
+        List<PenaltyResponse> penalties = penaltyService.getUnpaidPenaltiesByUserId(userId)
+                .stream()
+                .map(penaltyMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(penalties);
+    }
+
+    @GetMapping("/me/unpaid")
+    @Operation(summary = "Get my unpaid penalties", description = "Retrieves unpaid penalties for the authenticated driver or passenger")
+    public ResponseEntity<List<PenaltyResponse>> getMyUnpaidPenalties(Authentication auth) {
+        UUID userId = callerId(auth);
         List<PenaltyResponse> penalties = penaltyService.getUnpaidPenaltiesByUserId(userId)
                 .stream()
                 .map(penaltyMapper::toResponse)
@@ -153,6 +176,18 @@ public class PenaltyController {
     @Operation(summary = "Get penalty summary", description = "Gets summary of user's penalty status")
     public ResponseEntity<PenaltySummary> getPenaltySummary(
             @Parameter(description = "User ID") @PathVariable UUID userId) {
+        long count = penaltyService.getUnpaidPenaltyCount(userId);
+        BigDecimal totalAmount = penaltyService.getTotalUnpaidAmount(userId);
+        boolean hasUnpaid = penaltyService.hasUnpaidPenalties(userId);
+
+        PenaltySummary summary = new PenaltySummary(userId, count, totalAmount, hasUnpaid);
+        return ResponseEntity.ok(summary);
+    }
+
+    @GetMapping("/me/summary")
+    @Operation(summary = "Get my penalty summary", description = "Gets penalty summary for the authenticated driver or passenger")
+    public ResponseEntity<PenaltySummary> getMyPenaltySummary(Authentication auth) {
+        UUID userId = callerId(auth);
         long count = penaltyService.getUnpaidPenaltyCount(userId);
         BigDecimal totalAmount = penaltyService.getTotalUnpaidAmount(userId);
         boolean hasUnpaid = penaltyService.hasUnpaidPenalties(userId);
@@ -219,5 +254,12 @@ public class PenaltyController {
      * Simple error response class.
      */
     private record ErrorResponse(String message) {}
+
+    private static UUID callerId(Authentication auth) {
+        if (auth == null || auth.getPrincipal() == null) {
+            throw new IllegalStateException("Unauthenticated");
+        }
+        return UUID.fromString(auth.getPrincipal().toString());
+    }
 }
 

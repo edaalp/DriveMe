@@ -1,0 +1,65 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
+      show-sql: false
+  flyway:
+    url: ${SPRING_FLYWAY_URL:${SPRING_DATASOURCE_URL}}
+    user: ${SPRING_FLYWAY_USER:${SPRING_DATASOURCE_USERNAME}}
+    password: ${SPRING_FLYWAY_PASSWORD:${SPRING_DATASOURCE_PASSWORD}}
+    validate-on-migrate: ${SPRING_FLYWAY_VALIDATE_ON_MIGRATE:false}
+    repair-on-migrate: ${SPRING_FLYWAY_REPAIR_ON_MIGRATE:true}
+
+server:
+  address: ${SERVER_ADDRESS:0.0.0.0}
+  port: ${PORT:${SERVER_PORT:8080}}
+  forward-headers-strategy: framework
+
+admin:
+  signup-secret: ${ADMIN_SIGNUP_SECRET}
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}
+  websocket:
+    allowed-origin-patterns: ${APP_WEBSOCKET_ALLOWED_ORIGIN_PATTERNS:${APP_CORS_ALLOWED_ORIGINS}}
+  security:
+    public-docs: false
+    demo-public-payments: false
+  upload:
+    dir: ${APP_UPLOAD_DIR:/tmp/driveme-uploads}
+  public-base-url: ${APP_PUBLIC_BASE_URL}
+  mail:
+    enabled: ${MAIL_ENABLED:true}
+    from: ${MAIL_FROM}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+pricing:
+  useGoogleMaps: ${USE_GOOGLE_MAPS:true}
+  googleMapsApiKey: ${GOOGLE_MAPS_API_KEY}
+  useTrafficData: ${USE_TRAFFIC_DATA:true}
+  useWeatherApi: ${USE_WEATHER_API:true}
+  weatherApiKey: ${WEATHER_API_KEY}

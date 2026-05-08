@@ -183,9 +183,27 @@ public class DriverService {
     @Transactional
     public DriverResponse patchCurrentDriver(UUID driverId, DriverMePatchRequest request) {
         Driver driver = getDriverEntityById(driverId);
-        if (request.getAcceptsPets() != null) {
+        boolean changed = false;
+
+        if (request != null && hasText(request.getFullName())) {
+            driver.setFullName(request.getFullName().trim());
+            changed = true;
+        }
+        if (request != null && hasText(request.getPhoneNumber())) {
+            driver.setPhoneNumber(request.getPhoneNumber().trim());
+            changed = true;
+        }
+        if (request != null && request.getAcceptsPets() != null) {
             driver.setAcceptsPets(request.getAcceptsPets());
+            changed = true;
+        }
+        if (!changed) {
+            throw new IllegalArgumentException("No updatable fields provided");
         }
         return driverMapper.toResponse(driverRepository.save(driver));
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

@@ -1,6 +1,7 @@
 package com.driveme.backend.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -12,6 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Security configuration for password encoding and JWT authentication.
  */
@@ -21,6 +25,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Value("${app.security.public-docs:false}")
+    private boolean publicDocs;
+
+    @Value("${app.security.demo-public-payments:false}")
+    private boolean demoPublicPayments;
 
     /**
      * Provides a BCrypt password encoder bean.
@@ -39,6 +49,43 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        List<String> publicEndpoints = new ArrayList<>(List.of(
+                "/ws-chat/**",
+                "/api/messages/**",
+                "/api/auth/login",
+                "/api/auth/forgot-password",
+                "/api/auth/verify-reset-code",
+                "/api/auth/reset-password",
+                "/api/passengers/signup",
+                "/api/drivers/signup",
+                "/api/passengers/*/document/profile-picture",
+                "/api/drivers/*/document/profile-picture",
+                "/api/admin/signup",
+                "/actuator/health",
+                "/actuator/health/**",
+                "/error"
+        ));
+        if (publicDocs) {
+            publicEndpoints.addAll(List.of(
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui.html",
+                    "/actuator/**",
+                    "/uploads/**",
+                    "/api/admin/drivers/*/document/**",
+                    "/api/admin/vehicles/*/documents/*",
+                    "/api/passengers/*/document/**"
+            ));
+        }
+        if (demoPublicPayments) {
+            publicEndpoints.addAll(List.of(
+                    "/api/payments",
+                    "/api/payments/**",
+                    "/api/penalties",
+                    "/api/penalties/**"
+            ));
+        }
+
         http
             .cors(Customizer.withDefaults())
             // Allow embedding /uploads/* in admin (localhost:5173) iframes; same-origin blocks 5173→8080.
@@ -48,35 +95,7 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                        "/ws-chat/**",
-                        "/api/messages/**",
-                    // Auth endpoints
-                    "/api/auth/login",
-                    "/api/auth/forgot-password",
-                    "/api/auth/verify-reset-code",
-                    "/api/auth/reset-password",
-                    "/api/passengers/signup",
-                    "/api/drivers/signup",
-                    "/uploads/**",
-                    "/api/admin/signup",
-                    // Swagger UI
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/swagger-ui.html",
-                    // Payment endpoints (demo mode - should require auth in production)
-                    "/api/payments", "/api/payments/**",
-                    // Penalty endpoints (demo mode - should require auth in production)
-                    "/api/penalties", "/api/penalties/**",
-                    // Actuator endpoints
-                    "/actuator/**",
-                    // Error endpoint (so validation/error responses aren't blocked)
-                    "/error",
-                    // Document download endpoints (accessed via <img src> / window.open without JWT)
-                    "/api/admin/drivers/*/document/**",
-                    "/api/admin/vehicles/*/documents/*",
-                    "/api/passengers/*/document/**"
-                ).permitAll()
+                .requestMatchers(publicEndpoints.toArray(String[]::new)).permitAll()
                 // Admin endpoints require ADMIN role
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()

@@ -33,7 +33,8 @@ public class DriverMapper {
         driver.setMaxPickupRadiusKm(Optional.ofNullable(request.getMaxPickupRadiusKm()).orElse(10.0));
         driver.setMaxDropoffRadiusKm(Optional.ofNullable(request.getMaxDropoffRadiusKm()).orElse(50.0));
         driver.setAcceptsPets(Boolean.TRUE.equals(request.getAcceptsPets()));
-        driver.setAvgRating(0.0);
+        driver.setAvgRating(5.0);
+        driver.setRatingCount(0);
         driver.setTckNo(request.getTckNo());
         driver.setDriverLicenseNumber(request.getDriverLicenseNumber());
         driver.setLicenseIssueDate(request.getLicenseIssueDate());
@@ -83,8 +84,10 @@ public class DriverMapper {
                         : null);
         response.setProfilePictureUrl(
                 driver.getProfilePictureFile() != null
-                        ? base + "/api/admin/drivers/" + idStr + "/document/profile-picture"
+                        ? base + "/api/drivers/" + idStr + "/document/profile-picture"
                         : null);
+        response.setAvgRating(driver.getAvgRating() != null ? driver.getAvgRating() : 5.0);
+        response.setRatingCount(driver.getRatingCount() != null ? driver.getRatingCount() : 0);
 
         response.setVerificationStatus(driver.getVerificationStatus());
         response.setRejectionReason(driver.getRejectionReason());

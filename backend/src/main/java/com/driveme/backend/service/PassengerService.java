@@ -1,6 +1,7 @@
 package com.driveme.backend.service;
 
 import com.driveme.backend.common.VerificationStatus;
+import com.driveme.backend.dto.ProfileUpdateRequest;
 import com.driveme.backend.entity.Passenger;
 import com.driveme.backend.helper.PassengerMapper;
 import com.driveme.backend.repository.PassengerRepository;
@@ -146,6 +147,28 @@ public class PassengerService {
         return passengerRepository.findById(id);
     }
 
+    /** Update editable personal information for the authenticated passenger. */
+    @Transactional
+    public PassengerDTO updateCurrentPassenger(UUID passengerId, ProfileUpdateRequest request) {
+        Passenger passenger = passengerRepository.findById(passengerId)
+                .orElseThrow(() -> new IllegalArgumentException("Passenger not found"));
+
+        boolean changed = false;
+        if (request != null && hasText(request.getFullName())) {
+            passenger.setFullName(request.getFullName().trim());
+            changed = true;
+        }
+        if (request != null && hasText(request.getPhoneNumber())) {
+            passenger.setPhoneNumber(request.getPhoneNumber().trim());
+            changed = true;
+        }
+        if (!changed) {
+            throw new IllegalArgumentException("No updatable fields provided");
+        }
+
+        return passengerMapper.toDTO(passengerRepository.save(passenger));
+    }
+
     /** Get all passengers by verification status. */
     public List<PassengerDTO> getPassengersByVerificationStatus(VerificationStatus status) {
         return passengerRepository.findByVerificationStatus(status)
@@ -273,5 +296,9 @@ public class PassengerService {
             });
         }
         return sb.toString();
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

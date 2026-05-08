@@ -1,0 +1,16 @@
+target/
+.mvn/wrapper/maven-wrapper.jar
+backend.log
+uploads/
+src/main/resources/static/uploads/*
+!src/main/resources/static/uploads/.gitkeep
+.git/
+.idea/
+.vscode/
+*.log
+*.tmp
+application-local.yaml
+application-local.yml
+application-secrets.yaml
+application-secrets.yml
+*.env

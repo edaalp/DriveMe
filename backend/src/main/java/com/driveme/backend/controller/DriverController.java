@@ -9,6 +9,7 @@ import com.driveme.backend.service.DriverService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -109,10 +110,6 @@ public class DriverController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ErrorResponse("Only drivers can access this resource"));
         }
-        if (request.getAcceptsPets() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("No updatable fields provided"));
-        }
         try {
             UUID id = UUID.fromString(authentication.getPrincipal().toString());
             DriverResponse updated = driverService.patchCurrentDriver(id, request);
@@ -121,6 +118,26 @@ public class DriverController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse(e.getMessage()));
         }
+    }
+
+    /**
+     * Public profile picture endpoint for mobile image rendering.
+     */
+    @GetMapping("/{id}/document/profile-picture")
+    public ResponseEntity<byte[]> downloadProfilePicture(@PathVariable UUID id) {
+        Driver driver = driverService.getDriverEntityById(id);
+
+        if (driver.getProfilePictureFile() == null || driver.getProfilePictureFile().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = guessContentType(driver.getProfilePictureFileName());
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + driver.getProfilePictureFileName() + "\"")
+                .body(driver.getProfilePictureFile());
     }
 
     /**
@@ -172,4 +189,13 @@ public class DriverController {
      * Request body for updating driver availability.
      */
     private record AvailabilityRequest(boolean available) {}
+
+    private String guessContentType(String fileName) {
+        if (fileName == null) return MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        String lower = fileName.toLowerCase();
+        if (lower.endsWith(".png")) return MediaType.IMAGE_PNG_VALUE;
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return MediaType.IMAGE_JPEG_VALUE;
+        if (lower.endsWith(".webp")) return "image/webp";
+        return MediaType.APPLICATION_OCTET_STREAM_VALUE;
+    }
 }

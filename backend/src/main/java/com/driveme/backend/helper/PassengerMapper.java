@@ -22,12 +22,12 @@ public class PassengerMapper {
 
     /**
      * Public origin used to build absolute, browser-friendly download URLs
-     * (e.g. {@code http://192.168.1.5:8080/api/passengers/{id}/document/...}).
+     * (e.g. {@code http://192.168.1.2:8080/api/passengers/{id}/document/...}).
      * Defaults to the LAN testing host; override via the
      * {@code APP_PUBLIC_BASE_URL} environment variable when running against
      * a different host (e.g. {@code http://localhost:8080} for the admin web).
      */
-    @Value("${app.public-base-url:http://10.0.2.2:8080}")
+    @Value("${app.public-base-url:http://192.168.1.2:8080}")
     private String publicBaseUrl;
 
     /**
@@ -62,6 +62,8 @@ public class PassengerMapper {
         passenger.setProfilePictureUrl(profilePictureUrl);
         passenger.setTcPhotoFrontUrl(tcPhotoFrontUrl);
         passenger.setTcPhotoBackUrl(tcPhotoBackUrl);
+        passenger.setAvgRating(5.0);
+        passenger.setRatingCount(0);
         return passenger;
     }
 
@@ -98,6 +100,10 @@ public class PassengerMapper {
                 buildDocumentUrl(passenger, "tc-back",
                         passenger.getTcPhotoBackFile(),
                         passenger.getTcPhotoBackUrl()));
+        response.setAvgRating(passenger.getAvgRating() != null ? passenger.getAvgRating() : 5.0);
+        response.setRatingCount(passenger.getRatingCount() != null ? passenger.getRatingCount() : 0);
+        response.setVerificationStatus(passenger.getVerificationStatus());
+        response.setRejectionReason(passenger.getRejectionReason());
 
         return response;
     }

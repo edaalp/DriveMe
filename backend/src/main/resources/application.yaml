@@ -17,9 +17,9 @@ spring:
     # SchemaMigrator can hit "cached plan must not change result type" after
     # a Flyway migration that alters tables it introspected earlier in the
     # same pooled connection.
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://ep-aged-star-aldavdxb-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require&prepareThreshold=0}
-    username: ${SPRING_DATASOURCE_USERNAME:neondb_owner}
-    password: ${SPRING_DATASOURCE_PASSWORD:npg_DCGja3Q8Etuy}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/driveme}
+    username: ${SPRING_DATASOURCE_USERNAME:driveme}
+    password: ${SPRING_DATASOURCE_PASSWORD:driveme123}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -39,9 +39,9 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
-    url: ${SPRING_FLYWAY_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://ep-aged-star-aldavdxb-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require}}
-    user: ${SPRING_FLYWAY_USER:${SPRING_DATASOURCE_USERNAME:neondb_owner}}
-    password: ${SPRING_FLYWAY_PASSWORD:${SPRING_DATASOURCE_PASSWORD:npg_DCGja3Q8Etuy}}
+    url: ${SPRING_FLYWAY_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/driveme}}
+    user: ${SPRING_FLYWAY_USER:${SPRING_DATASOURCE_USERNAME:driveme}}
+    password: ${SPRING_FLYWAY_PASSWORD:${SPRING_DATASOURCE_PASSWORD:driveme123}}
     validate-on-migrate: false
     repair-on-migrate: true
 
@@ -70,9 +70,16 @@ server:
   port: ${SERVER_PORT:8080}
 
 admin:
-  signup-secret: ${ADMIN_SIGNUP_SECRET:driveme-admin-secret-2026}
+  signup-secret: ${ADMIN_SIGNUP_SECRET:dev-admin-signup-secret-change-me}
 
 app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000}
+  websocket:
+    allowed-origin-patterns: ${APP_WEBSOCKET_ALLOWED_ORIGIN_PATTERNS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000}
+  security:
+    public-docs: ${APP_SECURITY_PUBLIC_DOCS:true}
+    demo-public-payments: ${APP_SECURITY_DEMO_PUBLIC_PAYMENTS:true}
   upload:
     # Writable folder for signup uploads; served at /uploads/** (see WebMvcUploadConfig).
     dir: ${APP_UPLOAD_DIR:src/main/resources/static/uploads}
@@ -84,7 +91,7 @@ app:
   mail:
     # Set to true to send real OTP emails via SMTP.
     # When false the OTP is only logged and returned in the API response (dev mode).
-    enabled: ${MAIL_ENABLED:true}
+    enabled: ${MAIL_ENABLED:false}
     # "From" address shown to recipients.
     from: ${MAIL_FROM:noreply@driveme.com}
 
@@ -159,11 +166,11 @@ pricing:
   popularDestinationReturnFactor: 0.3
 
   # === GOOGLE MAPS API ===
-  useGoogleMaps: ${USE_GOOGLE_MAPS:true}
-  googleMapsApiKey: ${GOOGLE_MAPS_API_KEY:AIzaSyCX2EO4Hlvmz14vLCgTat3oeEm18iBYVSQ}
-  useTrafficData: ${USE_TRAFFIC_DATA:true}
+  useGoogleMaps: ${USE_GOOGLE_MAPS:false}
+  googleMapsApiKey: ${GOOGLE_MAPS_API_KEY:}
+  useTrafficData: ${USE_TRAFFIC_DATA:false}
 
   # === WEATHER API (OpenWeatherMap) ===
-  useWeatherApi: ${USE_WEATHER_API:true}
-  weatherApiKey: ${WEATHER_API_KEY:2eb975124fd025beedc70308273d8ac3}
+  useWeatherApi: ${USE_WEATHER_API:false}
+  weatherApiKey: ${WEATHER_API_KEY:}
   weatherApiUrl: https://api.openweathermap.org/data/2.5/weather
